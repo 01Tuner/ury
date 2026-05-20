@@ -78,7 +78,7 @@ const TableSelectionDialog: React.FC<Props> = ({ onClose }) => {
       }
       setLoadingTables(true);
       try {
-        const fetchedTables = await getTables(selectedRoom);
+        const fetchedTables = await getTables(selectedRoom, posProfile?.branch);
         const sortedTables = sortTables(fetchedTables);
         setTables(sortedTables);
         setTablesCache(prev => ({ ...prev, [selectedRoom]: fetchedTables }));

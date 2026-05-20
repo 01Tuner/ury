@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Percent, Coins } from 'lucide-react';
 import { usePOSStore } from '../store/pos-store';
-import { cn, formatCurrency } from '../lib/utils';
+import { formatCurrency } from '../lib/utils';
 import { Button, Input, Dialog, DialogContent } from './ui';
 import { call } from '../lib/frappe-sdk';
 import { printOrder } from '../lib/print';
@@ -138,7 +138,9 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
       });
       showToast.success(t('success.payment_successful'));
 
-      if (invoicePrinted === 0 && storePosProfile) {
+      // Always print after payment — earlier print only marks preview/KOT;
+      // final submitted invoice should still print (totals, payments, etc.).
+      if (storePosProfile) {
         try {
           await printOrder({ orderId: invoice, posProfile: storePosProfile });
           showToast.success(t('success.printed'));
@@ -164,16 +166,20 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent variant="xlarge" className="bg-white w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row p-0" showCloseButton={false}>
+      <DialogContent
+        variant="xlarge"
+        className="w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row p-0 overflow-hidden"
+        showCloseButton={false}
+      >
         {/* Left Column - Discount and Payment Mode */}
-        <div className="md:w-1/2 p-6 border-b md:border-b-0 md:border-r border-gray-200 overflow-y-auto">
+        <div className="md:w-1/2 p-6 border-b md:border-b-0 md:border-e border-border overflow-y-auto pos-scrollbar bg-card">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">{t('payment.title')}</h2>
+            <h2 className="text-2xl font-bold text-foreground">{t('payment.title')}</h2>
             <Button
               onClick={onClose}
               variant="ghost"
               size="icon"
-              className="p-2"
+              className="p-2 text-muted-foreground hover:text-foreground"
             >
               <X className="w-5 h-5" />
             </Button>
@@ -182,8 +188,8 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
           {/* Discount Section (conditional) */}
           {storePosProfile?.enable_discount === 1 && (
             <div className="space-y-4 mb-6">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Percent className="w-5 h-5" />
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Percent className="w-5 h-5 text-primary" />
                 {t('payment.apply_discount')}
               </h3>
               <div className="flex gap-2">
@@ -208,13 +214,15 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
 
           {/* Payment Methods Section - Split Payment */}
           <div className="space-y-4 mb-6">
-            <h3 className="text-lg font-semibold">{t('payment.payment_methods')}</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t('payment.payment_methods')}</h3>
             <div className="grid grid-cols-1 gap-3">
               {paymentModes.map((mode: any) => {
                 const id = typeof mode === 'string' ? mode : mode.id;
                 return (
                   <div key={id} className="flex items-center gap-3">
-                    <span className="w-24 font-medium">{typeof mode === 'string' ? mode : mode.name}</span>
+                    <span className="w-24 font-medium text-muted-foreground shrink-0">
+                      {typeof mode === 'string' ? mode : mode.name}
+                    </span>
                     <Input
                       type="number"
                       min="0"
@@ -231,14 +239,14 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
                 );
               })}
             </div>
-            <div className="flex justify-between mt-2 text-sm">
-              <span className="font-medium">{t('payment.total_entered')}</span>
-              <span className={'text-green-600 font-semibold flex items-center gap-1'}>
+            <div className="flex justify-between mt-2 text-sm rounded-lg bg-secondary/80 border border-border px-3 py-2">
+              <span className="font-medium text-muted-foreground">{t('payment.total_entered')}</span>
+              <span className="text-[hsl(var(--restro-green))] font-semibold flex items-center gap-1 tabular-nums">
                 {formatCurrency(paymentsTotal)} / {formatCurrency(finalTotal)}
                 {paymentsTotal > finalTotal && (
-                  <span className="text-yellow-700 font-semibold">
-                    <Coins className="inline w-4 h-4 ml-1 text-yellow-500" />
-                    <span className="text-yellow-500 font-bold ml-1">{formatCurrency(paymentsTotal - finalTotal)}</span>
+                  <span className="text-primary font-semibold flex items-center gap-1">
+                    <Coins className="inline w-4 h-4 text-primary" />
+                    <span className="font-bold">{formatCurrency(paymentsTotal - finalTotal)}</span>
                   </span>
                 )}
               </span>
@@ -247,42 +255,44 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
         </div>
 
         {/* Right Column - Order Summary and Pay Button */}
-        <div className="md:w-1/2 p-6 overflow-y-auto">
+        <div className="md:w-1/2 p-6 overflow-y-auto pos-scrollbar bg-secondary/30">
           {/* Error Message */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700 text-sm">{error}</p>
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+              <p className="text-destructive text-sm">{error}</p>
             </div>
           )}
 
           {/* Order Summary */}
           <div className="space-y-3 mb-6">
-            <h3 className="text-lg font-semibold">{t('payment.order_summary')}</h3>
-            <div className="space-y-2 text-sm">
+            <h3 className="text-lg font-semibold text-foreground">{t('payment.order_summary')}</h3>
+            <div className="space-y-2 text-sm rounded-lg border border-border bg-card p-4">
               {/* Subtotal (Grand Total) */}
               <div className="flex justify-between">
-                <span className="text-gray-600">{t('payment.subtotal')}</span>
-                <span>{formatCurrency(subtotal)}</span>
+                <span className="text-muted-foreground">{t('payment.subtotal')}</span>
+                <span className="text-foreground tabular-nums">{formatCurrency(subtotal)}</span>
               </div>
               {/* Discount */}
               {appliedDiscount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-[hsl(var(--restro-green))]">
                   <span>{t('payment.discount')}</span>
-                  <span>-{formatCurrency(appliedDiscount)}</span>
+                  <span className="tabular-nums">-{formatCurrency(appliedDiscount)}</span>
                 </div>
               )}
               {/* Adjustment (if any) */}
               {showFinalAdjustment && (
-                <div className="flex justify-between text-blue-600">
+                <div className="flex justify-between text-primary">
                   <span>{t('payment.adjustment')}</span>
-                  <span>{roundedFinalAdjustment > 0 ? '+' : ''}{formatCurrency(roundedFinalAdjustment)}</span>
+                  <span className="tabular-nums">
+                    {roundedFinalAdjustment > 0 ? '+' : ''}{formatCurrency(roundedFinalAdjustment)}
+                  </span>
                 </div>
               )}
               {/* Final Total (Rounded) */}
-              <div className="border-t pt-2">
-                <div className="flex justify-between font-semibold text-lg">
+              <div className="border-t border-border pt-2 mt-2">
+                <div className="flex justify-between font-semibold text-lg text-foreground">
                   <span>{t('payment.total')}</span>
-                  <span>{formatCurrency(finalTotal)}</span>
+                  <span className="text-primary tabular-nums">{formatCurrency(finalTotal)}</span>
                 </div>
               </div>
             </div>
@@ -303,4 +313,4 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
   );
 };
 
-export default PaymentDialog; 
+export default PaymentDialog;

@@ -54,29 +54,19 @@ export async function getTableCount(room: string, branch?: string): Promise<numb
   const countValue = rows[0]?.count ?? 0;
   return typeof countValue === 'number' ? countValue : Number(countValue) || 0;
 }
-export async function getTables(room: string): Promise<Table[]> {
-  const tables = await db.getDocList(DOCTYPES.URY_TABLE, {
-    fields: [
-      'name',
-      'occupied',
-      'latest_invoice_time',
-      'is_take_away',
-      'restaurant_room',
-      'table_shape',
-      'no_of_seats',
-      'layout_x',
-      'layout_y',
-      'minimum_seating'
-    ],
-    filters: [['restaurant_room', '=', room]],
-    asDict: true,
-  });
 
-  return tables as Table[];
+/** Uses whitelisted API so layout_* fields are only queried when they exist on URY Table. */
+export async function getTables(room: string, branch?: string): Promise<Table[]> {
+  const { call } = await import('./frappe-sdk');
+  const params: Record<string, string> = { room };
+  if (branch) {
+    params.branch = branch;
+  }
+  const res = await call.get('ury.ury_pos.api.getTablesForRoom', params);
+  return (res.message ?? []) as Table[];
 }
 
 
 export async function updateTableLayout(name: string, data: Partial<Table>) {
   return db.updateDoc(DOCTYPES.URY_TABLE, name, data);
 }
-

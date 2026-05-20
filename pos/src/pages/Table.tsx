@@ -127,7 +127,7 @@ const TableView = () => {
 
       setLoadingTables(true);
       try {
-        const fetchedTables = await getTables(roomName);
+        const fetchedTables = await getTables(roomName, branch ?? undefined);
         const sortedTables = sortTables(fetchedTables);
         setTables(sortedTables);
         setTablesCache(prev => ({ ...prev, [roomName]: sortedTables }));

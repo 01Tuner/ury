@@ -4,16 +4,49 @@ from datetime import date, datetime, timedelta
 from frappe.utils import validate_phone_number
 
 
+def _ury_table_list_fields():
+    """Fields safe to query on URY Table (layout_* only if present on site)."""
+    fields = [
+        "name",
+        "occupied",
+        "latest_invoice_time",
+        "is_take_away",
+        "restaurant_room",
+        "table_shape",
+        "no_of_seats",
+        "minimum_seating",
+    ]
+    meta = frappe.get_meta("URY Table")
+    for fieldname in ("layout_x", "layout_y"):
+        if meta.has_field(fieldname):
+            fields.append(fieldname)
+    return fields
+
+
 #GetTable  decripted temporarily
 @frappe.whitelist()
 def getTable(room):
-    branch_name = getBranch()   
+    branch_name = getBranch()
     tables = frappe.get_all(
         "URY Table",
-        fields=["name", "occupied", "latest_invoice_time", "is_take_away", "restaurant_room","table_shape","no_of_seats","layout_x","layout_y"],
-        filters={"branch": branch_name,"restaurant_room":room,}
-    )    
+        fields=_ury_table_list_fields(),
+        filters={"branch": branch_name, "restaurant_room": room},
+    )
     return tables
+
+
+@frappe.whitelist()
+def getTablesForRoom(room, branch=None):
+    """List tables for a room (used by React POS). Omits layout fields if not on DocType."""
+    filters = {"restaurant_room": room}
+    if branch:
+        filters["branch"] = branch
+    return frappe.get_all(
+        "URY Table",
+        fields=_ury_table_list_fields(),
+        filters=filters,
+        order_by="name asc",
+    )
 
 @frappe.whitelist()
 def getRestaurantMenu(pos_profile, room=None, order_type=None):
