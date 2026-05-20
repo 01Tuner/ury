@@ -421,18 +421,7 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
           }
 
           this.table = this.pastOrder.restaurant_table;
-          if (this.invoicePrinted === 0) {
-            this.alert.createAlert(
-              "Alert",
-              "Please Print Invoice before Payment",
-              "OK"
-            );
-            this.isLoading = false;
-            this.showPayment = false;
-
-          } else {
-            this.showPayment = true;
-          }
+          this.showPayment = true;
         })
         .catch((error) => console.error(error));
     },
@@ -518,15 +507,29 @@ export const usetoggleRecentOrder = defineStore("recentOrders", {
         this.alert.createAlert("Message", "Round Off Limit Exceeded", "OK");
         this.isLoading = false;
       } else {
+        const invoiceToPrint = this.invoiceNumber;
         this.call
           .post(
             "ury.ury.doctype.ury_order.ury_order.make_invoice",
             invoicePayment
           )
-          .then(() => {
+          .then(async () => {
             this.notification.createNotification("Payment Completed");
-            this.getPosInvoice(this.selectedStatus, 10, 0);
-            this.clearData();
+            try {
+              if (this.invoicePrinted === 0) {
+                await this.invoiceData.printFunction(invoiceToPrint);
+              }
+            } catch (error) {
+              console.error("Print failed:", error);
+              this.alert.createAlert(
+                "Message",
+                "Payment completed but invoice print failed",
+                "OK"
+              );
+            } finally {
+              this.getPosInvoice(this.selectedStatus, 10, 0);
+              this.clearData();
+            }
           })
           .catch((error) => {
             this.isLoading = false;

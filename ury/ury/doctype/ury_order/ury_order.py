@@ -579,12 +579,12 @@ def make_invoice(customer, payments, cashier, pos_profile,owner, additionalDisco
     # invoice.owner = owner
     invoice.save()
     try:
+        frappe.flags.skip_invoice_print_validation = True
         invoice.submit()
     except Exception as e:
         frappe.throw(f"Error while settling order: {e}")
-    
-    
-
+    finally:
+        frappe.flags.skip_invoice_print_validation = False
 # Cancel KOT Doc Creation
 def cancel_kot(invoice_id):
 

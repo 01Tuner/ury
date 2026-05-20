@@ -4,8 +4,10 @@ import { usePOSStore } from '../store/pos-store';
 import { cn, formatCurrency } from '../lib/utils';
 import { Button, Input, Dialog, DialogContent } from './ui';
 import { call } from '../lib/frappe-sdk';
+import { printOrder } from '../lib/print';
 import { DEFAULT_PAYMENT_MODE } from '../data/order-types';
 import { t } from '../i18n';
+import { showToast } from './ui/toast';
 
 
 interface PaymentDialogProps {
@@ -13,6 +15,7 @@ interface PaymentDialogProps {
   grandTotal: number;
   roundedTotal: number;
   invoice: string;
+  invoicePrinted: number;
   customer: string;
   posProfile: string;
   table: string | null;
@@ -27,6 +30,7 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
   grandTotal,
   roundedTotal,
   invoice,
+  invoicePrinted,
   customer,
   posProfile,
   table,
@@ -132,10 +136,22 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
         pos_profile: posProfile,
         table,
       });
-      // Show toast and reload orders (assume showToast and reload available globally)
-      if (typeof window !== 'undefined' && (window as any).showToast) {
-        (window as any).showToast.success('Payment successful');
+      showToast.success(t('success.payment_successful'));
+
+      if (invoicePrinted === 0 && storePosProfile) {
+        try {
+          await printOrder({ orderId: invoice, posProfile: storePosProfile });
+          showToast.success(t('success.printed'));
+        } catch (printErr) {
+          console.error('Print failed after payment:', printErr);
+          showToast.error(
+            t('errors.print_failed', {
+              reason: printErr instanceof Error ? printErr.message : String(printErr),
+            })
+          );
+        }
       }
+
       onClose();
       clearSelectedOrder();
       await fetchOrders();

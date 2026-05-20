@@ -468,13 +468,7 @@ export default function Orders() {
                 {(selectedOrder.status === 'Draft' || selectedOrder.status === 'Unbilled' || selectedOrder.status === 'Recently Paid') && (
                   <Button
                     className="flex-1"
-                    onClick={() => {
-                      if (String(selectedOrder.invoice_printed) === '0') {
-                        showToast.error(t('errors.please_print_first'));
-                        return;
-                      }
-                      setShowPaymentDialog(true);
-                    }}
+                    onClick={() => setShowPaymentDialog(true)}
                   >
                     {t('order.payment')}
                   </Button>
@@ -494,6 +488,7 @@ export default function Orders() {
           grandTotal={selectedOrder.grand_total}
           roundedTotal={selectedOrder.rounded_total}
           invoice={selectedOrder.name}
+          invoicePrinted={selectedOrder.invoice_printed}
           customer={selectedOrder.customer}
           posProfile={posStore.posProfile?.name || ''}
           table={selectedOrder.restaurant_table || null}

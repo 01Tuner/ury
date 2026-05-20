@@ -454,9 +454,10 @@ export const useInvoiceDataStore = defineStore("invoiceData", {
 
 
     },
-    printFunction: async function () {
+    printFunction: async function (invoiceNoOverride) {
       this.isPrinting = true;
       let invoiceNo =
+        invoiceNoOverride ||
         this.recentOrders.invoiceNumber ||
         this.tableInvoiceNo ||
         this.invoiceNumber;
