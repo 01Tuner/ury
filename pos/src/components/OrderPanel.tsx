@@ -148,24 +148,24 @@ const OrderPanel = () => {
 
   const EmptyCartUI = () => (
     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-      <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-        <FrownIcon className="w-12 h-12 text-gray-400" />
+      <div className="w-24 h-24 bg-secondary rounded-full flex items-center justify-center mb-6">
+        <FrownIcon className="w-12 h-12 text-muted-foreground" />
       </div>
       
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <h3 className="text-lg font-semibold text-foreground mb-2">
         {t('cart.empty_title')}
       </h3>
 
-      <p className="text-gray-500 text-sm mb-6 max-w-xs leading-relaxed">
+      <p className="text-muted-foreground text-sm mb-6 max-w-xs leading-relaxed">
         {t('cart.empty_subtitle')}
       </p>
 
-      <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
+      <div className="flex items-center gap-2 text-primary bg-primary/15 px-4 py-2 rounded-lg">
         <Plus className="w-4 h-4" />
         <span className="text-sm font-medium">{t('cart.click_to_add')}</span>
       </div>
 
-      <div className="mt-4 text-xs text-gray-400">
+      <div className="mt-4 text-xs text-muted-foreground">
         {t('cart.double_click_hint')}
       </div>
     </div>
@@ -180,8 +180,8 @@ const OrderPanel = () => {
   const isInteractionDisabled = isOrderInteractionDisabled() || isSubmitting;
 
   return (
-    <div className="w-96 bg-white border-s border-gray-200 flex flex-col h-[calc(100vh-4rem)] fixed end-0 z-10">
-      <div className="p-4 border-b border-gray-200 flex-shrink-0">
+    <div className="w-96 bg-card border-s border-border flex flex-col h-[calc(100vh-4rem)] fixed end-0 z-10">
+      <div className="p-4 border-b border-border flex-shrink-0">
         <OrderTypeSelect disabled={isInteractionDisabled} />
         <div className="mt-3"><CustomerSelect disabled={isInteractionDisabled} /></div>
       </div>
@@ -197,24 +197,24 @@ const OrderPanel = () => {
               <div
                 key={item.uniqueId}
                 className={cn(
-                  "flex flex-col py-4 border-b border-gray-100",
+                  "flex flex-col py-4 border-b border-border",
                   isInteractionDisabled && "opacity-50"
                 )}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-medium text-gray-900 text-sm">{item.name}</h3>
+                      <h3 className="font-medium text-foreground text-sm">{item.name}</h3>
                     </div>
                     {item.selectedVariant && (
-                      <p className="text-sm text-gray-600">{item.selectedVariant.name}</p>
+                      <p className="text-sm text-muted-foreground">{item.selectedVariant.name}</p>
                     )}
                     {item.selectedAddons && item.selectedAddons.length > 0 && (
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {item.selectedAddons.map(addon => addon.name).join(', ')}
                       </p>
                     )}
-                    <p className="text-gray-600 text-sm">{formatCurrency(calculateItemTotal(item))}</p>
+                    <p className="text-muted-foreground text-sm">{formatCurrency(calculateItemTotal(item))}</p>
                   </div>
                   
                   <div className="flex items-center gap-2">
@@ -222,7 +222,7 @@ const OrderPanel = () => {
                       onClick={() => handleEdit(item)}
                       variant="ghost"
                       size="icon"
-                      className="text-blue-600 hover:text-blue-700"
+                      className="text-primary hover:text-primary/80"
                       title={t('cart.edit_item')}
                       disabled={isInteractionDisabled}
                     >
@@ -283,7 +283,7 @@ const OrderPanel = () => {
             )}
           </div>
           
-          <div className="p-4 border-t border-gray-200 flex-shrink-0 bg-white">
+          <div className="p-4 border-t border-border flex-shrink-0 bg-card">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-2">
                 <Button
@@ -292,7 +292,7 @@ const OrderPanel = () => {
                   size="sm"
                   className={cn(
                     "h-8 w-8 p-0",
-                    orderComment ? "text-blue-600" : "text-gray-500 hover:text-gray-700"
+                    orderComment ? "text-primary" : "text-muted-foreground hover:text-foreground"
                   )}
                   disabled={isInteractionDisabled}
                   title={orderComment ? t('cart.edit_comment') : t('cart.add_comment')}

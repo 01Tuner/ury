@@ -101,9 +101,9 @@ const TableSelectionDialog: React.FC<Props> = ({ onClose }) => {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="bg-white rounded-lg w-full h-5/6 max-w-2xl mx-auto p-0 overflow-y-auto">
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900">{t('common.select_table_title')}</h2>
+      <DialogContent className="w-full h-5/6 max-w-2xl mx-auto p-0 overflow-y-auto">
+        <div className="p-4 border-b border-border flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-foreground">{t('common.select_table_title')}</h2>
           <Button onClick={onClose} variant="ghost" size="icon">
             <X className="w-5 h-5" />
           </Button>
@@ -120,7 +120,7 @@ const TableSelectionDialog: React.FC<Props> = ({ onClose }) => {
               <span>{error}</span>
             </div>
           ) : rooms.length === 0 ? (
-            <div className="mb-6 flex flex-col items-center justify-center gap-2 text-gray-400">
+            <div className="mb-6 flex flex-col items-center justify-center gap-2 text-muted-foreground">
               <Square className="w-8 h-8 mb-1" />
               <span>{t('common.no_rooms_found')}</span>
             </div>
@@ -151,7 +151,7 @@ const TableSelectionDialog: React.FC<Props> = ({ onClose }) => {
               <span>{error}</span>
             </div>
           ) : tables.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 text-gray-400 mt-8">
+            <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground mt-8">
               <Square className="w-8 h-8 mb-1" />
               <span>{t('common.no_tables_found')}</span>
             </div>
@@ -168,10 +168,10 @@ const TableSelectionDialog: React.FC<Props> = ({ onClose }) => {
                   className={cn(
                     'h-fit p-4 rounded-lg border-2 flex flex-col items-center gap-2 transition-colors relative',
                     selectedTable === table.name
-                      ? 'border-primary-600 bg-primary-50'
+                      ? 'border-primary bg-primary/15'
                       : table.occupied === 1
-                      ? 'border-amber-500 bg-amber-50 hover:border-amber-600 hover:bg-amber-100'
-                      : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50',
+                      ? 'border-primary/50 bg-card hover:border-primary hover:bg-accent'
+                      : 'border-[hsl(var(--restro-green))]/50 bg-card hover:border-[hsl(var(--restro-green))] hover:bg-accent',
                     'focus-visible:ring-2 focus-visible:ring-primary-600',
                   )}
                 >
@@ -179,14 +179,14 @@ const TableSelectionDialog: React.FC<Props> = ({ onClose }) => {
                     shape={table.table_shape}
                     className={cn(
                       'w-8 h-8',
-                      table.occupied === 1 ? 'text-amber-500' : 'text-gray-500'
+                      table.occupied === 1 ? 'text-primary' : 'text-muted-foreground'
                     )}
                   />
                   <div className="text-center">
                     <div className="font-medium">{table.name}</div>
                     <div className="mt-2 h-4"> {/* Height placeholder that matches Badge height */}
                       {table.occupied === 1 && (
-                        <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700 hover:bg-amber-100">
+                        <Badge variant="warning" className="text-xs">
                           {t('tables.occupied')}
                         </Badge>
                       )}

@@ -193,14 +193,14 @@ export default function Orders() {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <p className="text-xl font-semibold text-red-600 mb-2">Failed to load orders</p>
-          <p className="text-gray-600">{error}</p>
+          <p className="text-muted-foreground">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Left Sidebar - Order Types */}
       <OrderStatusSidebar
         selectedStatus={selectedStatus}
@@ -209,33 +209,33 @@ export default function Orders() {
 
       {/* Middle Section - Order Cards */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden pe-96">
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 pb-40">
+        <div className="flex-1 overflow-y-auto pos-surface p-4 pb-40">
           {orderLoading ? (
             <div className="flex items-center justify-center h-full">
               <Spinner />
             </div>
           ) : orders.length === 0 ? (
             <div className="text-center mt-10">
-              <p className="text-gray-500">{t('orders.no_orders_found')}</p>
+              <p className="text-muted-foreground">{t('orders.no_orders_found')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-screen-xl mx-auto">
               {orders.map((order) => (
                 <Card 
                   key={order.name} 
-                  className={`p-0 bg-white hover:shadow-md transition-shadow flex flex-col overflow-hidden cursor-pointer ${
-                    selectedOrder?.name === order.name ? 'ring-2 ring-blue-500 shadow-lg' : ''
+                  className={`p-0 hover:shadow-md transition-shadow flex flex-col overflow-hidden cursor-pointer ${
+                    selectedOrder?.name === order.name ? 'ring-2 ring-primary shadow-lg' : ''
                   }`}
                   onClick={() => handleOrderClick(order)}
                 >
                   <CardContent className="p-0 flex flex-col h-full">
-                    <div className="p-3 bg-gray-50 border-b">
-                    <h3 className="font-medium text-gray-900 text-sm truncate" title={order.name}>
+                    <div className="p-3 bg-secondary border-b border-border">
+                    <h3 className="font-medium text-foreground text-sm truncate" title={order.name}>
                       {order.name}
                     </h3>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {order.restaurant_table ? `Table ${order.restaurant_table} • ` : ''}{t(`order_types.${order.order_type.toLowerCase().replace(/ /g, '_')}`)}
                         </p>
                       </div>
@@ -248,17 +248,17 @@ export default function Orders() {
                     {/* Content section - matches MenuCard padding and structure */}
                     <div className="flex-1 p-3 flex flex-col">
                       <div className="">
-                        <p className="text-sm text-gray-900">{order.customer}</p>
+                        <p className="text-sm text-foreground">{order.customer}</p>
                       </div>
 
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Clock className="w-3.5 h-3.5" />
                         <span>{formatDateTime(order.posting_date, order.posting_time)}</span>
                       </div>
 
                       {/* Total - pushed to bottom like MenuCard */}
                       <div className="mt-auto pt-2">
-                        <span className="text-sm font-semibold text-gray-900 tabular-nums">
+                        <span className="text-sm font-semibold text-foreground tabular-nums">
                           {formatCurrency(order.rounded_total)}
                         </span>
                       </div>
@@ -302,9 +302,9 @@ export default function Orders() {
       </div>
 
       {/* Right Section - Order Details */}
-      <div className="w-96 bg-white border-s border-gray-200 flex flex-col h-[calc(100vh-4rem)] fixed end-0 z-10">
+      <div className="w-96 bg-card border-s border-border flex flex-col h-[calc(100vh-4rem)] fixed end-0 z-10">
         {!selectedOrder ? (
-          <div className="text-center h-full flex flex-col items-center justify-center text-gray-500 p-6">
+          <div className="text-center h-full flex flex-col items-center justify-center text-muted-foreground p-6">
             <p className="text-lg font-medium mb-2">{t('order.select_to_view')}</p>
             <p className="text-sm">{t('orders.click_to_view')}</p>
           </div>
@@ -320,15 +320,15 @@ export default function Orders() {
         ) : (
           <>
             {/* Fixed Header */}
-            <div className="sticky top-0 start-0 end-0 z-20 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between min-h-[64px]">
-              <h2 className="text-xl font-semibold text-gray-900 truncate max-w-[10rem]">{selectedOrder.name}</h2>
+            <div className="sticky top-0 start-0 end-0 z-20 bg-card border-b border-border px-6 py-4 flex items-center justify-between min-h-[64px]">
+              <h2 className="text-xl font-semibold text-foreground truncate max-w-[10rem]">{selectedOrder.name}</h2>
               <div className="flex items-center gap-2">
                 {/* Only show edit and cancel buttons for Draft, Unbilled, and Recently Paid orders */}
                 {(selectedOrder.status === 'Draft' || selectedOrder.status === 'Unbilled' || selectedOrder.status === 'Recently Paid') && (
                   <>
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center rounded-md p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="inline-flex items-center justify-center rounded-md p-2 bg-secondary hover:bg-accent text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                       aria-label="Edit order"
                       onClick={handleEditOrder}
                       disabled={editLoading}
@@ -338,7 +338,7 @@ export default function Orders() {
                     </button>
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center rounded-md p-2 bg-gray-100 hover:bg-gray-200 text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                      className="inline-flex items-center justify-center rounded-md p-2 bg-secondary hover:bg-accent text-destructive focus:outline-none focus:ring-2 focus:ring-destructive"
                       aria-label="Cancel order"
                       onClick={() => setCancelDialogOpen(true)}
                     >
@@ -388,24 +388,24 @@ export default function Orders() {
                   {/* First column: customer and time */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 text-sm">
-                      <User className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-900 font-medium">{selectedOrder.customer}</span>
+                      <User className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-foreground font-medium">{selectedOrder.customer}</span>
                     </div>
                     <div className="flex items-center gap-3 text-sm">
-                      <Clock className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-600">{formatDateTime(selectedOrder.posting_date, selectedOrder.posting_time)}</span>
+                      <Clock className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">{formatDateTime(selectedOrder.posting_date, selectedOrder.posting_time)}</span>
                     </div>
                   </div>
                   {/* Second column: waiter and table */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 text-sm">
-                      <UserCheck className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-600">{selectedOrder.waiter}</span>
+                      <UserCheck className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">{selectedOrder.waiter}</span>
                     </div>
                     {selectedOrder.restaurant_table && (
                       <div className="flex items-center gap-3 text-sm">
-                        <Receipt className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600">{selectedOrder.restaurant_table}</span>
+                        <Receipt className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">{selectedOrder.restaurant_table}</span>
                       </div>
                     )}
                   </div>
@@ -414,16 +414,16 @@ export default function Orders() {
 
               {/* Order Items */}
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('order.items_title')}</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-4">{t('order.items_title')}</h3>
                 <div className="space-y-3">
                   {selectedOrderItems.map((item, index) => (
-                    <div key={index} className="flex justify-between items-start py-2 border-b border-gray-100">
+                    <div key={index} className="flex justify-between items-start py-2 border-b border-border">
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{item.item_name}</p>
-                        <p className="text-xs text-gray-500">Qty: {item.qty}</p>
+                        <p className="text-sm font-medium text-foreground">{item.item_name}</p>
+                        <p className="text-xs text-muted-foreground">Qty: {item.qty}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-sm font-semibold text-foreground">
                           {formatCurrency(item.amount)}
                         </p>
                       </div>
@@ -435,12 +435,12 @@ export default function Orders() {
               {/* Taxes */}
               {selectedOrderTaxes.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('order.taxes_charges')}</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">{t('order.taxes_charges')}</h3>
                   <div className="space-y-2">
                     {selectedOrderTaxes.map((tax, index) => (
                       <div key={index} className="flex justify-between items-center py-1">
-                        <span className="text-sm text-gray-600">{tax.description}</span>
-                        <span className="text-sm font-medium text-gray-900">
+                        <span className="text-sm text-muted-foreground">{tax.description}</span>
+                        <span className="text-sm font-medium text-foreground">
                           {formatCurrency(tax.rate)}
                         </span>
                       </div>
@@ -451,7 +451,7 @@ export default function Orders() {
             </div>
 
             {/* Sticky Bottom Section - Single Row: Print | Payment | Total */}
-            <div className="border-t border-gray-200 p-6 bg-gray-50 sticky bottom-0 start-0 end-0 z-10">
+            <div className="border-t border-border p-6 bg-secondary sticky bottom-0 start-0 end-0 z-10">
               <div className="flex items-center gap-3 w-full">
                 {/* Print Icon Button */}
                 <Button
@@ -474,7 +474,7 @@ export default function Orders() {
                   </Button>
                 )}
                 {/* Total */}
-                <span className="ms-auto text-xl font-bold text-gray-900 whitespace-nowrap">
+                <span className="ms-auto text-xl font-bold text-foreground whitespace-nowrap">
                   {formatCurrency(selectedOrder.rounded_total)}
                 </span>
               </div>

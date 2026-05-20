@@ -7,10 +7,10 @@ const inputVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-gray-200 focus:border-blue-500 focus:ring-blue-200",
-        error: "border-red-300 focus:border-red-500 focus:ring-red-200",
-        success: "border-green-300 focus:border-green-500 focus:ring-green-200",
-        search: "border-gray-200 bg-gray-50 focus:border-blue-500 focus:ring-blue-200",
+        default: "border-border focus:border-primary focus:ring-primary/30",
+        error: "border-destructive focus:border-destructive focus:ring-destructive/30",
+        success: "border-[hsl(var(--restro-green))] focus:border-[hsl(var(--restro-green))] focus:ring-[hsl(var(--restro-green))]/30",
+        search: "border-border bg-secondary focus:border-primary focus:ring-primary/30",
       },
       size: {
         default: "h-10 px-3 py-2",

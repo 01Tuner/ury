@@ -7,7 +7,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-white hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 font-semibold",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90",
         outline:
@@ -16,8 +16,8 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "underline-offset-4 hover:underline text-primary",
-        tab: "bg-gray-100 text-gray-700 rounded-lg px-4 py-2 font-medium border-0 transition-colors data-[selected=true]:bg-primary-50 data-[selected=true]:text-primary-700 hover:bg-gray-200",
-        success: "bg-green-600 text-white hover:bg-green-700",
+        tab: "bg-secondary text-muted-foreground rounded-restro-lg px-4 py-2 font-semibold border-0 transition-colors data-[selected=true]:bg-[hsl(var(--restro-panel))] data-[selected=true]:text-foreground hover:text-foreground",
+        success: "bg-[hsl(var(--restro-green))] text-primary-foreground hover:opacity-90",
         warning: "bg-orange-600 text-white hover:bg-orange-700",
         danger: "bg-red-600 text-white hover:bg-red-700",
       },

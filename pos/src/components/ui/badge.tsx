@@ -8,19 +8,19 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+          "border-transparent bg-primary text-primary-foreground",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border-transparent bg-secondary text-secondary-foreground",
         destructive:
-          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground",
-        success: "border-transparent bg-green-100 text-green-800",
-        warning: "border-transparent bg-orange-100 text-orange-800",
-        danger: "border-transparent bg-red-100 text-red-800",
-        info: "border-transparent bg-blue-100 text-blue-800",
-        pending: "border-transparent bg-yellow-100 text-yellow-800",
-        completed: "border-transparent bg-green-100 text-green-800",
-        cancelled: "border-transparent bg-gray-100 text-gray-800",
+          "border-transparent bg-destructive text-destructive-foreground",
+        outline: "text-foreground border-border",
+        success: "border-transparent bg-[hsl(var(--restro-green))]/20 text-[hsl(var(--restro-green))]",
+        warning: "border-transparent bg-primary/20 text-primary",
+        danger: "border-transparent bg-destructive/20 text-destructive",
+        info: "border-transparent bg-secondary text-muted-foreground",
+        pending: "border-transparent bg-primary/15 text-primary",
+        completed: "border-transparent bg-[hsl(var(--restro-green))]/20 text-[hsl(var(--restro-green))]",
+        cancelled: "border-transparent bg-muted text-muted-foreground",
       },
       size: {
         default: "px-2.5 py-0.5 text-xs",
@@ -45,4 +45,4 @@ function Badge({ className, variant, size, ...props }: BadgeProps) {
   )
 }
 
-export { Badge, badgeVariants } 
+export { Badge, badgeVariants }

@@ -46,7 +46,7 @@ const OrderTypeSelect = ({ disabled }: OrderTypeSelectProps) => {
 
   return (
     <div>
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2">
+      <div className="flex gap-2 overflow-x-auto overflow-y-hidden pb-2 -mx-2 px-2 pos-scrollbar">
         {ORDER_TYPES.map(({ value, icon: Icon }) => {
           const isDineIn = value === DINE_IN;
           const isDisabled = disabled || (isDineIn && isRestrictedFromTableOrders) || isUpdatingOrder;
@@ -57,10 +57,10 @@ const OrderTypeSelect = ({ disabled }: OrderTypeSelectProps) => {
               onClick={() => handleOrderTypeSelect(value)}
               variant={selectedOrderType === value ? 'default' : 'outline'}
               className={cn(
-                'h-fit flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap bg-white border transition-colors',
+                'h-fit flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap border border-border transition-colors',
                 selectedOrderType === value
-                ? 'text-primary-700 bg-primary-50 border-primary-600 hover:bg-primary-50'
-                : 'text-gray-700 border-gray-200 hover:bg-gray-50',
+                ? 'text-primary bg-primary/15 border-primary hover:bg-primary/20'
+                : 'text-muted-foreground bg-secondary hover:bg-accent hover:text-foreground',
                 isDisabled && 'opacity-50 cursor-not-allowed'
               )}
               disabled={isDisabled}
@@ -77,7 +77,7 @@ const OrderTypeSelect = ({ disabled }: OrderTypeSelectProps) => {
         <Button
           onClick={() => setShowTableDialog(true)}
           variant="ghost"
-          className="h-fit w-fit gap-x-2 mt-2 text-sm text-primary-600 hover:text-primary-700"
+          className="h-fit w-fit gap-x-2 mt-2 text-sm text-primary hover:text-primary/80"
           disabled={disabled}
         >
           <HandPlatter className="w-4 h-4" /> {selectedTable}

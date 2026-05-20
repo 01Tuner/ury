@@ -1,33 +1,25 @@
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutGrid, 
-  ClipboardList, 
-  Table,
-} from 'lucide-react';
+import { LayoutGrid, ClipboardList, Table } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { t } from '../i18n';
 
 const Footer = () => {
-
   const navItems = [
     { icon: LayoutGrid, label: t('footer.pos'), path: '/' },
-    {icon: Table, label: t('footer.table'), path: '/table'},
+    { icon: Table, label: t('footer.table'), path: '/table' },
     { icon: ClipboardList, label: t('footer.orders'), path: '/orders' },
   ];
 
   return (
-    <div className="bg-white border-t border-gray-200 py-2 relative">
+    <div className="pos-footer-nav py-2 relative">
       <nav className="max-w-screen-xl mx-auto px-4">
-        <div className="flex justify-center items-center gap-4">
+        <div className="flex justify-center items-center gap-2">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                cn(
-                  'flex flex-col items-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors',
-                  isActive && 'text-blue-600'
-                )
+                cn('pos-nav-item', isActive && 'pos-nav-item-active')
               }
             >
               <item.icon className="w-5 h-5" />
@@ -40,4 +32,4 @@ const Footer = () => {
   );
 };
 
-export default Footer; 
+export default Footer;

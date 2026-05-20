@@ -77,6 +77,13 @@ export default {
         },
         white: "hsl(var(--white))",
         black: "hsl(var(--black))",
+        restro: {
+          gold: 'hsl(var(--restro-gold))',
+          green: 'hsl(var(--restro-green))',
+          surface: 'hsl(var(--restro-surface))',
+          elevated: 'hsl(var(--restro-elevated))',
+          panel: 'hsl(var(--restro-panel))',
+        },
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
@@ -85,6 +92,8 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        'restro-sm': '15px',
+        'restro-lg': '20px',
       },
       spacing: {
         'order-panel': 'var(--order-panel-width)',

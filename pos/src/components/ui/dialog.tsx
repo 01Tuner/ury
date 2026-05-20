@@ -19,7 +19,7 @@ const dialogVariants = cva(
 )
 
 const overlayVariants = cva(
-  "fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity",
+  "fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity",
   {
     variants: {
       variant: {
@@ -34,7 +34,7 @@ const overlayVariants = cva(
 )
 
 const contentVariants = cva(
-  "relative bg-white rounded-lg shadow-lg max-h-[90vh] overflow-hidden",
+  "relative bg-card text-card-foreground rounded-lg shadow-lg max-h-[90vh] overflow-hidden border border-border",
   {
     variants: {
       variant: {

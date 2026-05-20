@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Printer } from 'lucide-react';
+import { cn } from '../lib/utils';
 import { usePOSStore } from '../store/pos-store';
 import {
   Button,
@@ -318,20 +319,25 @@ const ShiftCloseDialog = ({
                   className={canPickEntry ? 'cursor-pointer' : ''}
                 />
                 {showEntryPicker && (
-                  <div className="absolute z-20 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-56 overflow-y-auto overscroll-contain">
+                  <div className="pos-dropdown" role="listbox">
                     {openEntries.length === 0 ? (
-                      <p className="p-3 text-sm text-gray-500">{t('shift.no_open_entries')}</p>
+                      <p className="pos-dropdown-empty">{t('shift.no_open_entries')}</p>
                     ) : (
                       openEntries.map((entry) => (
                         <button
                           key={entry.name}
                           type="button"
-                          className="w-full text-start px-4 py-2.5 hover:bg-gray-50 text-sm border-b last:border-b-0"
+                          role="option"
+                          aria-selected={selectedEntry === entry.name}
+                          className={cn(
+                            'pos-dropdown-item',
+                            selectedEntry === entry.name && 'pos-dropdown-item-active'
+                          )}
                           onClick={() => selectOpeningEntry(entry.name)}
                         >
-                          {entry.name}
+                          <span className="font-medium">{entry.name}</span>
                           {entry.posting_date && (
-                            <span className="text-gray-500 ms-2">({entry.posting_date})</span>
+                            <span className="text-muted-foreground ms-2">({entry.posting_date})</span>
                           )}
                         </button>
                       ))

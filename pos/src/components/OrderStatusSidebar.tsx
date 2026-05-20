@@ -19,22 +19,19 @@ const OrderStatusSidebar = ({
 }: OrderStatusSidebarProps) => {
   const { posProfile } = usePOSStore();
   
-  // Get the appropriate status types based on POS profile settings
   const statusTypes = getOrderStatusTypes(posProfile?.view_all_status, posProfile?.paid_limit);
 
   return (
     <div className={cn(
-      "w-64 bg-white border-e border-gray-200 h-full flex flex-col",
+      "w-64 bg-card border-e border-border h-full flex flex-col flex-shrink-0",
       disabled && "opacity-50 pointer-events-none"
     )}>
       <nav className="flex-1 p-6 overflow-y-auto">
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          {/* Section Title */}
-          <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3 px-1">
+        <div className="bg-secondary border border-border rounded-lg p-4">
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3 px-1">
             {t('orders.status_title')}
           </h2>
 
-          {/* Status Items */}
           <div className="space-y-1">
             {statusTypes.map((status) => (
               <Button
@@ -44,17 +41,16 @@ const OrderStatusSidebar = ({
                 className={cn(
                   'w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative',
                   selectedStatus === status.value
-                    ? 'bg-white text-gray-900 shadow-sm font-semibold'
-                    : 'text-gray-700 hover:bg-white/60 hover:text-gray-900'
+                    ? 'pos-sidebar-item-active'
+                    : 'pos-sidebar-item'
                 )}
                 disabled={disabled}
               >
-                {/* Active indicator bar */}
                 {selectedStatus === status.value && (
-                  <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-e-full" />
+                  <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-e-full" />
                 )}
                 <div className="flex items-center gap-3 ms-1">
-                  <FileText className="w-4 h-4 text-gray-500" />
+                  <FileText className="w-4 h-4 text-muted-foreground" />
                   <span>{t(`order_status_types.${status.value.toLowerCase().replace(/ /g, '_')}`)}</span>
                 </div>
               </Button>
@@ -66,4 +62,4 @@ const OrderStatusSidebar = ({
   );
 };
 
-export default OrderStatusSidebar; 
+export default OrderStatusSidebar;

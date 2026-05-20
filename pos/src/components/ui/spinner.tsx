@@ -13,7 +13,7 @@ export function Spinner({ className, message, hideMessage = false}: SpinnerProps
     <div className="flex items-center justify-center min-h-[inherit]">
       <div className="text-center">
         <div className={cn(
-          "animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mx-auto",
+          "pos-spinner mx-auto",
           className
         )} />
         {!hideMessage && displayMessage && <p className="mt-4 text-gray-600">{displayMessage}</p>}

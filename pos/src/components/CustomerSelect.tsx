@@ -115,12 +115,12 @@ function NewCustomerForm({
   return (
     <form className="space-y-4" onSubmit={handleAddCustomerSubmit}>
       {apiError && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-3">
+        <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3">
           <div className="text-sm text-red-600">{apiError}</div>
         </div>
       )}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="new-customer-name">{t('customer.name_label')} <span className="text-red-500">*</span></label>
+        <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="new-customer-name">{t('customer.name_label')} <span className="text-red-500">*</span></label>
         <Input
           id="new-customer-name"
           type="text"
@@ -135,7 +135,7 @@ function NewCustomerForm({
         )}
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="new-customer-phone">{t('customer.phone_label')} <span className="text-red-500">*</span></label>
+        <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="new-customer-phone">{t('customer.phone_label')} <span className="text-red-500">*</span></label>
         <div className="relative">
           <Input
             id="new-customer-phone"
@@ -147,14 +147,14 @@ function NewCustomerForm({
             className="pl-10"
             aria-invalid={!!formError && !newCustomerPhone}
           />
-          <Phone className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
+          <Phone className="absolute left-3 top-2.5 text-muted-foreground w-5 h-5" />
         </div>
         {formError && !newCustomerPhone && (
           <div className="text-xs text-red-500 mt-1">{t('customer.phone_required')}</div>
         )}
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">{t('customer.customer_group_label')}</label>
+        <label className="block text-sm font-medium text-muted-foreground mb-1">{t('customer.customer_group_label')}</label>
         <Select
           placeholder={loadingGroups ? t('common.loading') : t('customer.select_group')}
           value={newCustomerGroup}
@@ -168,11 +168,11 @@ function NewCustomerForm({
           ))}
         </Select>
         {!loadingGroups && !customerGroups.length && (
-          <div className="text-xs text-gray-400 mt-1">{t('common.no_options')}</div>
+          <div className="text-xs text-muted-foreground mt-1">{t('common.no_options')}</div>
         )}
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">{t('customer.territory_label')}</label>
+        <label className="block text-sm font-medium text-muted-foreground mb-1">{t('customer.territory_label')}</label>
         <Select
           placeholder={loadingTerritories ? t('common.loading') : t('customer.select_territory')}
           value={newCustomerTerritory}
@@ -186,7 +186,7 @@ function NewCustomerForm({
           ))}
         </Select>
         {!loadingTerritories && !territories.length && (
-          <div className="text-xs text-gray-400 mt-1">{t('common.no_options')}</div>
+          <div className="text-xs text-muted-foreground mt-1">{t('common.no_options')}</div>
         )}
       </div>
       <div className="flex gap-3 mt-6">
@@ -302,17 +302,17 @@ export function CustomerSelect({ disabled }: CustomerSelectProps) {
   return (
     <div className="relative">
       {selectedCustomer ? (
-        <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg">
+        <div className="flex items-center justify-between bg-primary/15 border border-primary/30 p-3 rounded-lg">
           <div>
-            <p className="font-medium text-blue-900">{selectedCustomer.name}</p>
-            <p className="text-sm text-blue-700">{selectedCustomer.phone}</p>
+            <p className="font-medium text-foreground">{selectedCustomer.name}</p>
+            <p className="text-sm text-muted-foreground">{selectedCustomer.phone}</p>
           </div>
           <Button
             onClick={() => setSelectedCustomer(null)}
             disabled={isUpdatingOrder}
             variant="ghost"
             size="sm"
-            className="text-blue-700 hover:text-blue-800"
+            className="text-primary hover:text-primary/80"
           >
             {t('common.change')}
           </Button>
@@ -335,19 +335,19 @@ export function CustomerSelect({ disabled }: CustomerSelectProps) {
               }}
               onKeyDown={handleKeyDown}
               placeholder={t('customer.search_placeholder')}
-              className="w-full h-10 border border-gray-200 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors"
+              className="w-full h-10 border border-input bg-background rounded-lg px-4 py-2 text-sm font-medium text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors placeholder:text-muted-foreground"
               aria-label={t('customer.search_placeholder')}
               autoComplete="off"
             />
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>
           {isOpen && (
-            <div className="absolute w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+            <div className="absolute w-full mt-2 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
               {searchTerm.trim() === '' && !isSearching && !searchError && (
-                <div className="p-4 text-center text-gray-400 text-sm select-none">{t('customer.type_to_search')}</div>
+                <div className="p-4 text-center text-muted-foreground text-sm select-none">{t('customer.type_to_search')}</div>
               )}
               {isSearching && (
-                <div className="flex items-center justify-center p-4 text-gray-500 text-sm select-none">
+                <div className="flex items-center justify-center p-4 text-muted-foreground text-sm select-none">
                   <Loader className="w-4 h-4 mr-2 animate-spin" /> {t('common.searching')}
                 </div>
               )}
@@ -361,8 +361,8 @@ export function CustomerSelect({ disabled }: CustomerSelectProps) {
                   <button
                     key={customer.name}
                     type="button"
-                    className={`w-full gap-2 px-4 py-2 text-left rounded-md text-gray-800 text-sm select-none transition-colors ${
-                      idx === highlightedIndex ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50'
+                    className={`w-full gap-2 px-4 py-2 text-left rounded-md text-foreground text-sm select-none transition-colors ${
+                      idx === highlightedIndex ? 'bg-primary/15 text-primary' : 'hover:bg-accent'
                     }`}
                     onMouseDown={() => {
                       setSelectedCustomer({ id: customer.name, name, phone });
@@ -372,18 +372,18 @@ export function CustomerSelect({ disabled }: CustomerSelectProps) {
                     onMouseEnter={() => setHighlightedIndex(idx)}
                   >
                     <div className="font-medium">{name}</div>
-                    <div className="ml-auto text-xs text-gray-500">{phone}</div>
+                    <div className="ml-auto text-xs text-muted-foreground">{phone}</div>
                   </button>
                 );
               })}
               {!isSearching && !searchError && searchResults.length === 0 && searchTerm.trim() && (
-                <div className="p-4 text-center text-gray-400 text-sm select-none">{t('customer.no_customers_found')}</div>
+                <div className="p-4 text-center text-muted-foreground text-sm select-none">{t('customer.no_customers_found')}</div>
               )}
-              <div className="my-1 h-px bg-gray-100" />
+              <div className="my-1 h-px bg-border" />
               <button
                 type="button"
-                className={`flex items-center gap-2 w-full px-4 py-2 text-primary-600 hover:text-primary-700 hover:bg-gray-50 font-medium rounded-md text-sm select-none transition-colors ${
-                  highlightedIndex === searchResults.length ? 'bg-primary-50' : ''
+                className={`flex items-center gap-2 w-full px-4 py-2 text-primary hover:text-primary/80 hover:bg-accent font-medium rounded-md text-sm select-none transition-colors ${
+                  highlightedIndex === searchResults.length ? 'bg-primary/15' : ''
                 }`}
                 onMouseDown={() => {
                   // Prefill logic
@@ -416,7 +416,7 @@ export function CustomerSelect({ disabled }: CustomerSelectProps) {
           }}
         >
           <DialogContent className="w-full max-w-md p-4 max-h-[80vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('customer.add_customer_title')}</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-4">{t('customer.add_customer_title')}</h3>
             <NewCustomerForm 
               onClose={() => setShowNewCustomerForm(false)} 
               isCreatingCustomer={isCreatingCustomer}
