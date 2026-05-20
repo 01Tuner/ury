@@ -568,6 +568,7 @@ def getPosProfile():
         "pos_profile": pos_profile_name,
         "branch": branch,
         "company": company,
+        "customer": pos_profiles.customer or None,
         "waiter": waiter,
         "warehouse": warehouse,
         "cashier": cashier,
@@ -588,6 +589,34 @@ def getPosProfile():
     }
 
     return invoice_details
+
+
+@frappe.whitelist()
+def get_pos_profile_default_customer(pos_profile=None):
+    """Return default customer from POS Profile for React POS cart."""
+    if not pos_profile:
+        branch_name = getBranch()
+        pos_profile = frappe.db.exists("POS Profile", {"branch": branch_name})
+    if not pos_profile:
+        return None
+
+    customer_id = frappe.db.get_value("POS Profile", pos_profile, "customer")
+    if not customer_id:
+        return None
+
+    row = frappe.db.get_value(
+        "Customer",
+        customer_id,
+        ["name", "customer_name", "mobile_number"],
+        as_dict=True,
+    )
+    if not row:
+        return {"id": customer_id, "name": customer_id, "phone": ""}
+    return {
+        "id": row.name,
+        "name": row.customer_name or row.name,
+        "phone": row.mobile_number or "",
+    }
 
 
 @frappe.whitelist()

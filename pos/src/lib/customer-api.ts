@@ -95,6 +95,42 @@ function getscramblePattern(text: string) {
   return `%${text.split("").join("%")}%`;
 }
 
+/** Cart customer shape used in POS store */
+export interface CartCustomer {
+  id: string;
+  name: string;
+  phone: string;
+}
+
+export async function getCustomerById(customerId: string): Promise<CartCustomer> {
+  const doc = await db.getDoc(DOCTYPES.CUSTOMER, customerId);
+  return {
+    id: doc.name as string,
+    name: (doc.customer_name as string) || (doc.name as string),
+    phone: (doc.mobile_number as string) || (doc.mobile_no as string) || '',
+  };
+}
+
+/** Loads POS Profile default customer via server (avoids cache/permission issues). */
+export async function getPosProfileDefaultCustomer(
+  posProfileName?: string
+): Promise<CartCustomer | null> {
+  const params: Record<string, string> = {};
+  if (posProfileName) {
+    params.pos_profile = posProfileName;
+  }
+  const res = await call.get('ury.ury_pos.api.get_pos_profile_default_customer', params);
+  const data = res.message;
+  if (!data || !data.id) {
+    return null;
+  }
+  return {
+    id: data.id,
+    name: data.name || data.id,
+    phone: data.phone || '',
+  };
+}
+
 export async function searchCustomers(search: string, limit = 5) {
   if (!search.trim()) return [];
 

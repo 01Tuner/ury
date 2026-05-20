@@ -223,7 +223,13 @@ interface CustomerSelectProps {
 }
 
 export function CustomerSelect({ disabled }: CustomerSelectProps) {
-  const { selectedCustomer, setSelectedCustomer, selectedOrderType, isUpdatingOrder } = usePOSStore();
+  const {
+    selectedCustomer,
+    setSelectedCustomer,
+    clearSelectedCustomer,
+    selectedOrderType,
+    isUpdatingOrder,
+  } = usePOSStore();
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -308,7 +314,11 @@ export function CustomerSelect({ disabled }: CustomerSelectProps) {
             <p className="text-sm text-muted-foreground">{selectedCustomer.phone}</p>
           </div>
           <Button
-            onClick={() => setSelectedCustomer(null)}
+            onClick={() => {
+              clearSelectedCustomer();
+              setSearchTerm('');
+              setTimeout(() => inputRef.current?.focus(), 0);
+            }}
             disabled={isUpdatingOrder}
             variant="ghost"
             size="sm"

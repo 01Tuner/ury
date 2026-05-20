@@ -4,7 +4,13 @@ import { storage } from '../lib/storage';
 import { getRestaurantMenu, getAggregatorMenu, MenuItem as APIMenuItem } from '../lib/menu-api';
 import { getCurrencyInfo, PosProfileCombined, getCombinedPosProfile } from '../lib/pos-profile-api';
 import { getMenuCourses } from '../lib/menu-course-api';
-import { getCustomerGroups, getCustomerTerritories } from '../lib/customer-api';
+import {
+  getCustomerById,
+  getCustomerGroups,
+  getCustomerTerritories,
+  getPosProfileDefaultCustomer,
+} from '../lib/customer-api';
+import { getPosProfileLimitedFields } from '../lib/pos-profile-api';
 import { DEFAULT_ORDER_TYPE, OrderType } from '../data/order-types';
 import { getTableOrder, TableOrder } from '../lib/order-api';
 import { getPaymentModes } from '../lib/payment-api';
@@ -120,6 +126,8 @@ interface POSState {
   tableOrder: TableOrder | null;
   isInitializing: boolean;
   orderComment: string;
+  /** User clicked Change — do not auto-fill POS Profile default customer again */
+  skipDefaultCustomer: boolean;
 }
 
 interface POSStore extends POSState {
@@ -134,6 +142,7 @@ interface POSStore extends POSState {
   setSelectedCategory: (category: string) => void;
   setSearchQuery: (query: string) => void;
   setSelectedCustomer: (customer: Customer | null) => void;
+  clearSelectedCustomer: () => void;
   setSelectedTable: (table: string | null, room: string | null, doNotLoadOrder?: boolean) => void;
   setSelectedOrderType: (type: OrderType) => void;
   setQuickFilter: (filter: 'all' | 'special') => void;
@@ -157,6 +166,7 @@ interface POSStore extends POSState {
   initializeApp: () => Promise<void>;
   setOrderForUpdate: (orderId: string | null) => void;
   resetOrderState: () => void;
+  applyDefaultCustomerFromProfile: () => Promise<void>;
   setSelectedAggregator: (aggregator: Aggregator | null) => void;
   setOrderComment: (comment: string) => void;
 }
@@ -204,6 +214,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
   isUpdatingOrder: false,
   orderId: null,
   orderComment: '',
+  skipDefaultCustomer: false,
 
   initializeApp: async () => {
     try {
@@ -227,6 +238,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
         return;
       }
 
+      await get().applyDefaultCustomerFromProfile();
       set({ isInitializing: false });
     } catch (error) {
       set({ 
@@ -236,16 +248,77 @@ export const usePOSStore = create<POSStore>((set, get) => ({
     }
   },
 
+  applyDefaultCustomerFromProfile: async () => {
+    const { posProfile, selectedOrderType, isUpdatingOrder, skipDefaultCustomer } = get();
+    if (skipDefaultCustomer || selectedOrderType === 'Aggregators' || isUpdatingOrder) return;
+
+    try {
+      // Prefer server API (reads live POS Profile + Customer; not stale session cache)
+      const customer = await getPosProfileDefaultCustomer(posProfile?.name);
+      if (customer) {
+        if (posProfile && !posProfile.customer) {
+          set({ posProfile: { ...posProfile, customer: customer.id } });
+        }
+        set({ selectedCustomer: customer });
+        return;
+      }
+    } catch (error) {
+      console.error('get_pos_profile_default_customer failed:', error);
+    }
+
+    let customerLink = posProfile?.customer ?? null;
+    if (!customerLink && posProfile?.name) {
+      try {
+        const limited = await getPosProfileLimitedFields();
+        customerLink = limited.customer ?? null;
+        if (customerLink) {
+          set({ posProfile: { ...posProfile, customer: customerLink } });
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    if (!customerLink) {
+      set({ selectedCustomer: null });
+      return;
+    }
+
+    try {
+      const customer = await getCustomerById(customerLink);
+      set({ selectedCustomer: customer });
+    } catch (error) {
+      console.error('Failed to load default customer from POS profile:', error);
+      set({
+        selectedCustomer: {
+          id: customerLink,
+          name: customerLink,
+          phone: '',
+        },
+      });
+    }
+  },
+
   fetchPosProfile: async () => {
     try {
       const cached = sessionStorage.getItem('posProfile');
       if (cached) {
         const profile = JSON.parse(cached);
+        try {
+          const limited = await getPosProfileLimitedFields();
+          if (limited.customer) {
+            profile.customer = limited.customer;
+            sessionStorage.setItem('posProfile', JSON.stringify(profile));
+          }
+        } catch {
+          /* keep cached profile */
+        }
         set({ 
           posProfile: profile, 
           profileLoading: false,
           currency: profile.currency || 'INR'
         });
+        await get().applyDefaultCustomerFromProfile();
         if (!storage.getItem('currencySymbol')) {
           await get().fetchCurrencySymbol();
         }
@@ -261,6 +334,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
         profileLoading: false,
         currency: combinedProfile.currency || 'INR'
       });
+      await get().applyDefaultCustomerFromProfile();
       
       if (!storage.getItem('currencySymbol')) {
         await get().fetchCurrencySymbol();
@@ -450,7 +524,14 @@ export const usePOSStore = create<POSStore>((set, get) => ({
 
   setSelectedCategory: (category) => set({ selectedCategory: category }),
   setSearchQuery: (query) => set({ searchQuery: query }),
-  setSelectedCustomer: (customer) => set({ selectedCustomer: customer }),
+  setSelectedCustomer: (customer) =>
+    set({
+      selectedCustomer: customer,
+      skipDefaultCustomer: customer === null ? get().skipDefaultCustomer : false,
+    }),
+
+  clearSelectedCustomer: () =>
+    set({ selectedCustomer: null, skipDefaultCustomer: true }),
   setSelectedTable: (table: string | null, room: string | null, doNotLoadOrder: boolean = false) => {
     set({ selectedTable: table, selectedRoom: room });
     if (table ) {
@@ -630,20 +711,20 @@ export const usePOSStore = create<POSStore>((set, get) => ({
         set({ 
           tableOrder: null,
           activeOrders: [],
-          selectedCustomer: null,
           isUpdatingOrder: false,
           orderId: null,
         });
+        await get().applyDefaultCustomerFromProfile();
       }
     } catch (error) {
       set({ 
         error: 'Failed to load table order',
         tableOrder: null,
         activeOrders: [],
-        selectedCustomer: null,
         isUpdatingOrder: false,
         orderId: null,
       });
+      await get().applyDefaultCustomerFromProfile();
     } finally {
       set({ orderLoading: false });
     }
@@ -653,10 +734,10 @@ export const usePOSStore = create<POSStore>((set, get) => ({
     set({ 
       tableOrder: null,
       activeOrders: [],
-      selectedCustomer: null,
       isUpdatingOrder: false,
       orderId: null,
     });
+    void get().applyDefaultCustomerFromProfile();
   },
 
   setOrderForUpdate: (orderId: string | null) => {
@@ -667,10 +748,9 @@ export const usePOSStore = create<POSStore>((set, get) => ({
   },
 
   resetOrderState: () => {
-    const { fetchMenuItems } = get();
+    const { fetchMenuItems, applyDefaultCustomerFromProfile } = get();
     
     set({
-      selectedCustomer: null,
       selectedTable: null,
       selectedRoom: null,
       selectedAggregator: null,
@@ -683,8 +763,10 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       error: null,
       selectedOrderType: DEFAULT_ORDER_TYPE,
       orderComment: '',
+      skipDefaultCustomer: false,
     });
 
+    void applyDefaultCustomerFromProfile();
     fetchMenuItems();
   },
 
