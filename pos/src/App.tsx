@@ -32,8 +32,8 @@ function App() {
       <ToastProvider />
       <ScreenSizeProvider>
         <AuthGuard>
-          <POSOpeningProvider>
-            <Router basename="/pos">
+          <Router basename="/pos">
+            <POSOpeningProvider>
               <div className="flex flex-col h-screen bg-gray-100 font-inter">
                 <Header />
                 <div className="flex-1 overflow-hidden">
@@ -45,8 +45,8 @@ function App() {
                 </div>
                 <Footer />
               </div>
-            </Router>
-          </POSOpeningProvider>
+            </POSOpeningProvider>
+          </Router>
         </AuthGuard>
       </ScreenSizeProvider>
     </>

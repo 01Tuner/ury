@@ -8,6 +8,7 @@ import {
   Monitor,
   LogOut,
   RefreshCw,
+  DoorClosed,
 } from 'lucide-react';
 import { Button, Input } from './ui';
 import { useRootStore } from '../store/root-store';
@@ -15,9 +16,11 @@ import { usePOSStore } from '../store/pos-store';
 import type { RootState } from '../store/root-store';
 import { logout } from '../lib/auth-api';
 import { showToast } from './ui/toast';
+import { useShift } from '../context/shift-context';
 
 const Header = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const { isShiftOpen, openCloseDialog } = useShift();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const user = useRootStore((state: RootState) => state.user);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -156,6 +159,19 @@ const Header = () => {
                   <p className="text-sm text-gray-500">{user?.name || ''}</p>
                 </div>
                 <div className="py-2">
+                  {isShiftOpen && (
+                    <Button
+                      variant="ghost"
+                      className="flex justify-start items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        openCloseDialog();
+                      }}
+                    >
+                      <DoorClosed className="w-4 h-4 me-3" />
+                      {t('shift.close_shift')}
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     className="flex justify-start items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
