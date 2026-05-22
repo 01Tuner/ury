@@ -303,26 +303,43 @@ export const usePOSStore = create<POSStore>((set, get) => ({
     try {
       const cached = sessionStorage.getItem('posProfile');
       if (cached) {
-        const profile = JSON.parse(cached);
+        const profile = JSON.parse(cached) as PosProfileCombined;
         try {
           const limited = await getPosProfileLimitedFields();
-          if (limited.customer) {
-            profile.customer = limited.customer;
-            sessionStorage.setItem('posProfile', JSON.stringify(profile));
+          const refreshed: PosProfileCombined = {
+            ...profile,
+            customer: limited.customer ?? profile.customer,
+            waiter: limited.waiter,
+            cashier: limited.cashier,
+            print_format: limited.print_format,
+            qz_print: limited.qz_print,
+            qz_host: limited.qz_host,
+            printer: limited.printer,
+            print_type: limited.print_type,
+            tableAttention: limited.tableAttention,
+            paid_limit: limited.paid_limit,
+            disable_rounded_total: limited.disable_rounded_total,
+            enable_discount: limited.enable_discount,
+            multiple_cashier: limited.multiple_cashier,
+            owner: limited.owner,
+            edit_order_type: limited.edit_order_type,
+            enable_kot_reprint: limited.enable_kot_reprint,
+            kot_print_format: limited.kot_print_format,
+          };
+          sessionStorage.setItem('posProfile', JSON.stringify(refreshed));
+          set({
+            posProfile: refreshed,
+            profileLoading: false,
+            currency: refreshed.currency || 'INR',
+          });
+          await get().applyDefaultCustomerFromProfile();
+          if (!storage.getItem('currencySymbol')) {
+            await get().fetchCurrencySymbol();
           }
+          return;
         } catch {
-          /* keep cached profile */
+          /* fall through to full fetch if limited API fails */
         }
-        set({ 
-          posProfile: profile, 
-          profileLoading: false,
-          currency: profile.currency || 'INR'
-        });
-        await get().applyDefaultCustomerFromProfile();
-        if (!storage.getItem('currencySymbol')) {
-          await get().fetchCurrencySymbol();
-        }
-        return;
       }
 
       set({ profileLoading: true, error: null });

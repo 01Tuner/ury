@@ -124,6 +124,27 @@ export async function searchPosInvoice(query: string, status: string) {
   }
 } 
 
+export async function getKotPrintHtml(kotName: string, printFormat: string) {
+  try {
+    const response = await call.get<{ message: { html: string } }>(
+      'frappe.www.printview.get_html_and_style',
+      {
+        doc: 'URY KOT',
+        name: kotName,
+        print_format: printFormat,
+        _lang: 'en',
+        no_letterhead: 1,
+        letterhead: 'No Letterhead',
+        settings: {},
+      }
+    );
+    return response.message.html;
+  } catch (error) {
+    console.error('Error fetching KOT print HTML:', error);
+    throw new Error('Failed to fetch KOT print HTML');
+  }
+}
+
 export async function getInvoicePrintHtml(invoiceId: string, printFormat: string) {
   try {
     const response = await call.get<{ message: { html: string } }>(

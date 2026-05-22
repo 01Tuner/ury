@@ -27,9 +27,29 @@
     "search_placeholder_default": "Rechercher commandes, articles ou clients...",
     "search_placeholder_orders": "Rechercher des commandes",
     "search_placeholder_menu": "Rechercher dans le menu",
+    "printer_mapping": "Mappage imprimantes",
     "switch_to_desk": "Accéder au bureau",
     "clear_cache": "Vider le cache",
     "logout": "Déconnexion"
+  },
+  "printer_mapping": {
+    "title": "Mappage imprimantes QZ",
+    "description": "Associez les imprimantes ticket et cuisine (unités de production). Enregistré sur cet appareil.",
+    "bill_printer": "Imprimante facture",
+    "production_printers": "Imprimantes cuisine (unités de production)",
+    "select_printer": "Choisir une imprimante",
+    "none": "— Non mappée —",
+    "refresh_printers": "Actualiser les imprimantes",
+    "qz_connection_failed": "Connexion à QZ Tray impossible. Installez et démarrez QZ, puis réessayez.",
+    "qz_host_missing": "Hôte QZ non configuré sur le profil POS.",
+    "mapping_saved": "Mappage enregistré",
+    "bill_printer_required": "Sélectionnez une imprimante facture avant d'enregistrer",
+    "bill_printer_fallback": "Aucune imprimante facture mappée ; utilisation de l'imprimante par défaut",
+    "cache_note": "Les mappages sont enregistrés sur cet appareil et conservés lors du vidage du cache.",
+    "kot_format_missing": "Format d'impression KOT non défini sur le profil POS ; KOT non imprimé.",
+    "kot_print_success": "{{count}} KOT imprimé(s)",
+    "kot_print_skipped": "{{count}} KOT ignoré(s) (aucune imprimante mappée pour cette cuisine)",
+    "kot_print_failed": "Échec impression KOT : {{reason}}"
   },
   "menu": {
     "special_items": "Plats spéciaux"
@@ -39,6 +59,8 @@
     "all_items": "Tous les articles"
   },
   "cart": {
+    "title": "Panier",
+    "open_cart": "Ouvrir le panier",
     "empty_title": "Votre panier est vide",
     "empty_subtitle": "Ajoutez des articles pour commencer votre commande",
     "click_to_add": "Cliquez sur les articles pour les ajouter",

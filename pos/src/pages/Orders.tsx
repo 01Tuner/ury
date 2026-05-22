@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { showToast } from '../components/ui/toast';
 import OrderStatusSidebar from '../components/OrderStatusSidebar';
 import { useRootStore } from '../store/root-store';
-import { formatCurrency } from '../lib/utils';
+import { cn, formatCurrency } from '../lib/utils';
 import { Spinner } from '../components/ui/spinner';
 import { Textarea } from '../components/ui/textarea';
 import { usePOSStore } from '../store/pos-store';
@@ -199,16 +199,16 @@ export default function Orders() {
     );
   }
 
+  const showMobileDetail = !!selectedOrder;
+
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Left Sidebar - Order Types */}
+    <div className="flex flex-col lg:flex-row h-full min-h-0 overflow-hidden bg-background">
       <OrderStatusSidebar
         selectedStatus={selectedStatus}
         setSelectedStatus={setSelectedStatus}
       />
 
-      {/* Middle Section - Order Cards */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden pe-96">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden lg:pe-[var(--order-panel-width)]">
         <div className="flex-1 overflow-y-auto pos-surface p-4 pb-40">
           {orderLoading ? (
             <div className="flex items-center justify-center h-full">
@@ -301,8 +301,21 @@ export default function Orders() {
         </div>
       </div>
 
-      {/* Right Section - Order Details */}
-      <div className="w-96 bg-card border-s border-border flex flex-col h-[calc(100vh-4rem)] fixed end-0 z-10">
+      {showMobileDetail && (
+        <button
+          type="button"
+          className="pos-order-panel-backdrop lg:hidden"
+          aria-label={t('common.close')}
+          onClick={() => clearSelectedOrder()}
+        />
+      )}
+
+      <div
+        className={cn(
+          'pos-detail-panel',
+          showMobileDetail ? 'flex' : 'hidden lg:flex'
+        )}
+      >
         {!selectedOrder ? (
           <div className="text-center h-full flex flex-col items-center justify-center text-muted-foreground p-6">
             <p className="text-lg font-medium mb-2">{t('order.select_to_view')}</p>
@@ -320,9 +333,19 @@ export default function Orders() {
         ) : (
           <>
             {/* Fixed Header */}
-            <div className="sticky top-0 start-0 end-0 z-20 bg-card border-b border-border px-6 py-4 flex items-center justify-between min-h-[64px]">
-              <h2 className="text-xl font-semibold text-foreground truncate max-w-[10rem]">{selectedOrder.name}</h2>
-              <div className="flex items-center gap-2">
+            <div className="sticky top-0 start-0 end-0 z-20 bg-card border-b border-border px-4 sm:px-6 py-4 flex items-center justify-between min-h-[64px] gap-2">
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground truncate flex-1 min-w-0">{selectedOrder.name}</h2>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden h-8 w-8"
+                  onClick={() => clearSelectedOrder()}
+                  aria-label={t('common.close')}
+                >
+                  <X className="w-5 h-5" />
+                </Button>
                 {/* Only show edit and cancel buttons for Draft, Unbilled, and Recently Paid orders */}
                 {(selectedOrder.status === 'Draft' || selectedOrder.status === 'Unbilled' || selectedOrder.status === 'Recently Paid') && (
                   <>

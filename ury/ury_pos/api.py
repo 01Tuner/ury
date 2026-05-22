@@ -510,6 +510,7 @@ def getPosProfile():
         multiple_cashier = pos_profiles.custom_enable_multiple_cashier
         edit_order_type = pos_profiles.custom_edit_order_type
         enable_kot_reprint = pos_profiles.custom_enable_kot_reprint
+        kot_print_format = pos_profiles.get("custom_reprint_kot_format")
         if multiple_cashier:
             details = getBranchRoom()
             room = details[0].get('name') 
@@ -584,11 +585,28 @@ def getPosProfile():
         "multiple_cashier":multiple_cashier,
         "owner":owner,
         "edit_order_type":edit_order_type,
-        "enable_kot_reprint":enable_kot_reprint
+        "enable_kot_reprint":enable_kot_reprint,
+        "kot_print_format": kot_print_format,
 
     }
 
     return invoice_details
+
+
+@frappe.whitelist()
+def get_production_units_for_branch(branch=None):
+    """List URY Production Units for the POS branch (QZ printer mapping UI)."""
+    if not branch:
+        branch = getBranch()
+    if not branch:
+        return []
+
+    return frappe.get_all(
+        "URY Production Unit",
+        filters={"branch": branch},
+        fields=["name", "production"],
+        order_by="production asc",
+    )
 
 
 @frappe.whitelist()

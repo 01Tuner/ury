@@ -9,17 +9,26 @@ import {
   LogOut,
   RefreshCw,
   DoorClosed,
+  Printer,
 } from 'lucide-react';
 import { Button, Input } from './ui';
 import { useRootStore } from '../store/root-store';
 import { usePOSStore } from '../store/pos-store';
 import type { RootState } from '../store/root-store';
 import { logout } from '../lib/auth-api';
+import {
+  restoreQzPrinterMappings,
+  snapshotQzPrinterMappings,
+} from '../lib/qz-printer-mapping';
 import { showToast } from './ui/toast';
 import { useShift } from '../context/shift-context';
+import PrinterMappingDialog from './PrinterMappingDialog';
+
 const Header = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showPrinterMapping, setShowPrinterMapping] = useState(false);
   const { isShiftOpen, openCloseDialog } = useShift();
+  const posProfile = usePOSStore((state) => state.posProfile);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const user = useRootStore((state: RootState) => state.user);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -93,51 +102,53 @@ const Header = () => {
   };
 
   const handleClearCache = () => {
+    const printerMappings = snapshotQzPrinterMappings();
     localStorage.clear();
     sessionStorage.clear();
+    restoreQzPrinterMappings(printerMappings);
     window.location.reload();
   };
 
   return (
-    <header className="pos-header">
-      <div className="flex items-center justify-between h-16 px-6">
-        <div className="flex items-center">
+    <header className="pos-header shrink-0">
+      <div className="flex items-center justify-between gap-2 h-16 px-3 sm:px-6 min-w-0">
+        <div className="flex items-center shrink-0">
           <Link to="/" className="flex items-center gap-3 no-underline hover:opacity-90 transition-opacity">
-            <span className="text-2xl font-bold tracking-tight select-none" aria-label="Dine Pos">
+            <span className="text-xl sm:text-2xl font-bold tracking-tight select-none" aria-label="Dine Pos">
               <span className="text-primary">Dine</span>
               <span className="text-foreground"> Pos</span>
             </span>
           </Link>
         </div>
 
-        <div className="pos-search-bar px-4 py-2 flex-1 flex items-center max-w-2xl mx-8">
+        <div className="pos-search-bar px-3 sm:px-4 py-2 flex-1 flex items-center min-w-0 max-w-2xl mx-2 sm:mx-4 lg:mx-8">
           <Input
             ref={searchInputRef}
             placeholder={searchPlaceholder}
-            className="h-fit p-0 w-full bg-transparent border-0 text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="h-fit p-0 w-full min-w-0 bg-transparent border-0 text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 text-sm sm:text-base"
             value={searchValue}
             onChange={searchOnChange}
           />
-          <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="hidden sm:flex items-center gap-2 text-muted-foreground shrink-0">
             <Command className="w-4 h-4" />
             <span>K</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           <div className="relative" ref={userMenuRef}>
             <Button
               onClick={handleUserMenuToggle}
               variant="ghost"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+              className="flex items-center gap-1 sm:gap-2 text-muted-foreground hover:text-foreground px-1 sm:px-3"
             >
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
                 <User className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="text-sm font-medium text-foreground">
+              <span className="hidden md:inline text-sm font-medium text-foreground max-w-[8rem] truncate">
                 {user?.full_name || 'User'}
               </span>
-              <ChevronDown className="w-4 h-4" />
+              <ChevronDown className="w-4 h-4 hidden sm:block" />
             </Button>
 
             {showUserMenu && (
@@ -149,6 +160,19 @@ const Header = () => {
                   <p className="text-sm text-muted-foreground">{user?.name || ''}</p>
                 </div>
                 <div className="py-2">
+                  {Number(posProfile?.qz_print) === 1 && (
+                    <Button
+                      variant="ghost"
+                      className="flex justify-start items-center w-full px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        setShowPrinterMapping(true);
+                      }}
+                    >
+                      <Printer className="w-4 h-4 me-3" />
+                      {t('header.printer_mapping')}
+                    </Button>
+                  )}
                   {isShiftOpen && (
                     <Button
                       variant="ghost"
@@ -192,6 +216,16 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {Number(posProfile?.qz_print) === 1 && posProfile.qz_host && (
+        <PrinterMappingDialog
+          open={showPrinterMapping}
+          onClose={() => setShowPrinterMapping(false)}
+          qzHost={posProfile.qz_host}
+          posProfileName={posProfile.name}
+          branch={posProfile.branch}
+        />
+      )}
     </header>
   );
 };

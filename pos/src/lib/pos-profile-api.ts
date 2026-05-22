@@ -22,6 +22,8 @@ export interface PosProfileLimited {
   multiple_cashier: number;
   owner: string;
   edit_order_type?: number;
+  enable_kot_reprint?: number;
+  kot_print_format?: string | null;
 }
 
 export interface PosProfileLimitedResponse {
@@ -83,6 +85,8 @@ export interface PosProfileCombined extends PosProfileFull {
   enable_discount: number;
   multiple_cashier: number;
   edit_order_type?: number;
+  enable_kot_reprint?: number;
+  kot_print_format?: string | null;
   view_all_status?: number;
   custom_daily_pos_close?: number;
 }
@@ -135,6 +139,8 @@ export async function getCombinedPosProfile(): Promise<PosProfileCombined> {
     enable_discount: limitedProfile.enable_discount,
     multiple_cashier: limitedProfile.multiple_cashier,
     edit_order_type: limitedProfile.edit_order_type,
+    enable_kot_reprint: limitedProfile.enable_kot_reprint,
+    kot_print_format: limitedProfile.kot_print_format,
   };
 
   return combinedProfile;

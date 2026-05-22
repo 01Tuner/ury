@@ -34,9 +34,29 @@
         "search_placeholder_default": "ابحث عن الطلبات، عناصر القائمة، أو العملاء...",
         "search_placeholder_orders": "ابحث عن الطلبات",
         "search_placeholder_menu": "ابحث في القائمة",
+        "printer_mapping": "ربط الطابعات",
         "switch_to_desk": "التبديل إلى المكتب",
         "clear_cache": "مسح ذاكرة التخزين المؤقت",
         "logout": "تسجيل الخروج"
+    },
+    "printer_mapping": {
+        "title": "ربط طابعات QZ",
+        "description": "اربط طابعة الفاتورة والمطبخ (وحدات الإنتاج). يُحفظ على هذا الجهاز.",
+        "bill_printer": "طابعة الفاتورة",
+        "production_printers": "طابعات المطبخ (وحدات الإنتاج)",
+        "select_printer": "اختر الطابعة",
+        "none": "— غير مربوطة —",
+        "refresh_printers": "تحديث الطابعات",
+        "qz_connection_failed": "تعذر الاتصال بـ QZ Tray. ثبّت QZ وشغّله ثم أعد المحاولة.",
+        "qz_host_missing": "لم يُضبط مضيف QZ في ملف POS.",
+        "mapping_saved": "تم حفظ ربط الطابعات",
+        "bill_printer_required": "اختر طابعة الفاتورة قبل الحفظ",
+        "bill_printer_fallback": "لا توجد طابعة فاتورة مربوطة؛ سيتم استخدام الافتراضي",
+        "cache_note": "تُحفظ ربطات الطابعات على هذا الجهاز ولا تُزال عند مسح ذاكرة التخزين المؤقت.",
+        "kot_format_missing": "لم يُضبط تنسيق طباعة KOT في ملف POS؛ لم تُطبع KOT.",
+        "kot_print_success": "تم طباعة {{count}} KOT",
+        "kot_print_skipped": "تم تخطي {{count}} KOT (لا طابعة مربوطة لهذا المطبخ)",
+        "kot_print_failed": "فشل طباعة KOT: {{reason}}"
     },
     "menu": {
         "special_items": "أصناف مميزة"
@@ -46,6 +66,8 @@
         "all_items": "جميع الأصناف"
     },
     "cart": {
+        "title": "السلة",
+        "open_cart": "فتح السلة",
         "empty_title": "عربة التسوق فارغة",
         "empty_subtitle": "أضف عناصر للبدء في طلبك",
         "click_to_add": "انقر على العناصر لإضافتها",

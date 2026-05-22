@@ -7,6 +7,9 @@ import {
   updatePrintStatus
 } from './invoice-api';
 import { PosProfileCombined } from './pos-profile-api';
+import { getBillPrinter } from './qz-printer-mapping';
+import { showToast } from '../components/ui/toast';
+import { t } from '../i18n';
 
 interface PrintOrderParams {
   orderId: string;
@@ -23,7 +26,11 @@ export async function printOrder({ orderId, posProfile }: PrintOrderParams): Pro
       throw new Error('QZ host is not set');
     }
     const html = await getInvoicePrintHtml(orderId, print_format as string);
-    await printWithQz(qz_host, html);
+    const billPrinter = getBillPrinter(name);
+    if (!billPrinter) {
+      showToast.info(t('printer_mapping.bill_printer_fallback'));
+    }
+    await printWithQz(qz_host, html, billPrinter ?? undefined);
     await updatePrintStatus(orderId);
     return 'qz';
   } else if (print_type === 'network') {
@@ -60,7 +67,8 @@ export async function printClosingEntry({
       throw new Error('QZ host is not set');
     }
     const html = await getClosingEntryPrintHtml(entryName, printFormat);
-    await printWithQz(qz_host, html);
+    const billPrinter = getBillPrinter(name);
+    await printWithQz(qz_host, html, billPrinter ?? undefined);
     return 'qz';
   }
 

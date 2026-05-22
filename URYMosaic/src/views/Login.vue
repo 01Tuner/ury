@@ -24,6 +24,7 @@ export default {
 	return {
 	  email: null,
 	  password: null,
+	  redirect_route: null,
 	};
   },
   inject: ["$auth"],
@@ -38,7 +39,12 @@ export default {
 	  if (this.email && this.password) {
 		let res = await this.$auth.login(this.email, this.password);
 		if (res) {
-		  this.$router.push({ name: "Home" });
+		  const redirect = this.redirect_route;
+		  if (redirect) {
+		    this.$router.push(redirect);
+		  } else {
+		    this.$router.push({ name: 'KOT' });
+		  }
 		}
 	  }
 	},

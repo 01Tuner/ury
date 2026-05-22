@@ -1,34 +1,35 @@
 import './index.css';
-import { createApp, reactive } from "vue";
-import App from "./App.vue";
-
+import { createApp } from 'vue';
+import App from './App.vue';
 import router from './router';
+import { auth, checkAuth, mosaicAuth } from './lib/auth';
 
 const app = createApp(App);
 
-// Plugins
 app.use(router);
+app.provide('$auth', mosaicAuth);
 
-// Global Properties,
-// components can inject this
-
-// Configure route gaurds
 router.beforeEach(async (to, from, next) => {
-	if (to.matched.some((record) => !record.meta.isLoginPage)) {
-		// this route requires auth, check if logged in
-		// if not, redirect to login page.
-		if (!auth.isLoggedIn) {
-			next({ name: 'Login', query: { route: to.path } });
-		} else {
-			next();
-		}
-	} else {
-		if (auth.isLoggedIn) {
-			next({ name: 'Home' });
-		} else {
-			next();
-		}
-	}
+  if (auth.checking) {
+    await checkAuth();
+  }
+
+  if (to.matched.some((record) => !record.meta.isLoginPage)) {
+    if (!auth.isLoggedIn) {
+      next({ name: 'Login', query: { route: to.fullPath } });
+    } else {
+      next();
+    }
+  } else if (auth.isLoggedIn) {
+    const redirect = to.query?.route;
+    if (typeof redirect === 'string' && redirect.startsWith('/')) {
+      next(redirect);
+    } else {
+      next({ name: 'KOT' });
+    }
+  } else {
+    next();
+  }
 });
 
-app.mount("#app");
+app.mount('#app');

@@ -34,11 +34,11 @@ const Sidebar = ({ disabled }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "w-64 bg-card border-e border-border h-screen flex flex-col",
+      "hidden lg:flex w-64 shrink-0 bg-card border-e border-border h-full flex-col",
       disabled && "opacity-50 pointer-events-none"
     )}>
       {/* Categories List */}
-      <nav className="flex-1 p-6 overflow-y-auto">
+      <nav className="flex-1 min-h-0 p-6 overflow-y-auto overscroll-contain pos-scrollbar">
         <div className="bg-secondary border border-border rounded-lg p-4">
           {/* Section Title */}
           <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3 px-1">

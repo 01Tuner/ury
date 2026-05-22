@@ -27,9 +27,29 @@
     "search_placeholder_default": "Search orders, menu items, or customers...",
     "search_placeholder_orders": "Search Orders",
     "search_placeholder_menu": "Search Menu",
+    "printer_mapping": "Printer mapping",
     "switch_to_desk": "Switch To Desk",
     "clear_cache": "Clear Cache",
     "logout": "Logout"
+  },
+  "printer_mapping": {
+    "title": "QZ printer mapping",
+    "description": "Map bill and kitchen (production unit) printers. Saved on this device.",
+    "bill_printer": "Bill printer",
+    "production_printers": "Kitchen printers (production units)",
+    "select_printer": "Select printer",
+    "none": "— Not mapped —",
+    "refresh_printers": "Refresh printers",
+    "qz_connection_failed": "Could not connect to QZ Tray. Install and start QZ, then try again.",
+    "qz_host_missing": "QZ host is not configured on the POS Profile.",
+    "mapping_saved": "Printer mapping saved",
+    "bill_printer_required": "Select a bill printer before saving",
+    "bill_printer_fallback": "No bill printer mapped; using system default",
+    "cache_note": "Printer mappings are saved on this device and are kept when you clear cache.",
+    "kot_format_missing": "KOT print format is not set on the POS Profile; KOT was not printed.",
+    "kot_print_success": "Printed {{count}} KOT(s)",
+    "kot_print_skipped": "{{count}} KOT(s) skipped (no printer mapped for that kitchen)",
+    "kot_print_failed": "KOT print failed: {{reason}}"
   },
   "menu": {
     "special_items": "Special Items"
@@ -39,6 +59,8 @@
     "all_items": "All Items"
   },
   "cart": {
+    "title": "Cart",
+    "open_cart": "Open cart",
     "empty_title": "Your cart is empty",
     "empty_subtitle": "Add items to get started with your order",
     "click_to_add": "Click items to add them",

@@ -81,6 +81,7 @@ def create_kot_doc(
         )
     kot_doc.insert()
     kot_doc.submit()
+    return {"name": kot_doc.name, "production": production}
 
 # Function to get all production item groups for a given branch
 def get_all_production_item_groups(branch):
@@ -117,6 +118,7 @@ def process_items_for_kot(
     kot_naming_series,
     kot_type,
 ):
+    created_kots = []
     kot_items = create_order_items(items)
     pos_profile = frappe.get_doc("POS Profile", pos_profile_id)
     productions = frappe.db.get_all(
@@ -166,7 +168,7 @@ def process_items_for_kot(
                 if invoice_exist:
                     kot_type = "Order Modified"
 
-                create_kot_doc(
+                kot_info = create_kot_doc(
                     invoice_id,
                     customer,
                     restaurant_table,
@@ -177,10 +179,14 @@ def process_items_for_kot(
                     kot_naming_series,
                     production.name,
                 )
+                if kot_info:
+                    created_kots.append(kot_info)
     else:
         frappe.throw(
             "Create URY Production unit against POS Profile: %s " % pos_profile.name
         )
+
+    return created_kots
 
 
 # Process items to create a cancel KOT document
@@ -195,7 +201,7 @@ def process_items_for_cancel_kot(
     kot_type,
     invoiceItems,
 ):
-
+    created_kots = []
     kot_items = create_order_items(items)
     pos_profile = frappe.get_doc("POS Profile", pos_profile_id)
     productions = frappe.db.get_all(
@@ -215,7 +221,7 @@ def process_items_for_cancel_kot(
         ]
 
         if production_items:
-            create_cancel_kot_doc(
+            kot_info = create_cancel_kot_doc(
                 invoice_id,
                 restaurant_table,
                 production_items,
@@ -227,6 +233,10 @@ def process_items_for_cancel_kot(
                 invoiceItems,
                 production.name,
             )
+            if kot_info:
+                created_kots.append(kot_info)
+
+    return created_kots
 
 
 # Create a cancel KOT document
@@ -316,6 +326,7 @@ def create_cancel_kot_doc(
 
     kot_cancel_doc.insert()
     kot_cancel_doc.submit()
+    return {"name": kot_cancel_doc.name, "production": production}
 
 
 # Whitelisted function to handle KOT entry
@@ -351,29 +362,38 @@ def kot_execute(
     positive_qty_items = [item for item in final_array if int(item["qty"]) > 0]
     negative_qty_items = [item for item in final_array if int(item["qty"]) <= 0]
     total_cancel_items = negative_qty_items + removed_item
+    created_kots = []
     if positive_qty_items:
-        process_items_for_kot(
-            invoice_id,
-            customer,
-            restaurant_table,
-            positive_qty_items,
-            comments,
-            pos_profile_id,
-            kot_naming_series,
-            "New Order",
+        created_kots.extend(
+            process_items_for_kot(
+                invoice_id,
+                customer,
+                restaurant_table,
+                positive_qty_items,
+                comments,
+                pos_profile_id,
+                kot_naming_series,
+                "New Order",
+            )
+            or []
         )
     if total_cancel_items:
-        process_items_for_cancel_kot(
-            invoice_id,
-            customer,
-            restaurant_table,
-            total_cancel_items,
-            comments,
-            pos_profile_id,
-            cancel_kot_naming_series,
-            "Partially cancelled",
-            new_invoice_items_array,
+        created_kots.extend(
+            process_items_for_cancel_kot(
+                invoice_id,
+                customer,
+                restaurant_table,
+                total_cancel_items,
+                comments,
+                pos_profile_id,
+                cancel_kot_naming_series,
+                "Partially cancelled",
+                new_invoice_items_array,
+            )
+            or []
         )
+
+    return created_kots
 
 
 # Compare two arrays and return the items that are different

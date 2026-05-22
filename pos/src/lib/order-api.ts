@@ -79,6 +79,20 @@ export interface SyncOrderRequest {
   room?: string;
 }
 
+export interface CreatedKot {
+  name: string;
+  production: string;
+}
+
+export interface SyncOrderResponse {
+  name: string;
+  created_kots?: CreatedKot[];
+  [key: string]: unknown;
+}
+
 export const syncOrder = async (data: SyncOrderRequest) => {
-  return call.post( 'ury.ury.doctype.ury_order.ury_order.sync_order',data);
+  return call.post<SyncOrderResponse>(
+    'ury.ury.doctype.ury_order.ury_order.sync_order',
+    data
+  );
 }; 

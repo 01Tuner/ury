@@ -196,4 +196,45 @@
   .pos-dropdown-empty {
     @apply p-3 text-sm text-muted-foreground;
   }
+
+  /* Layout: desktop keeps side cart; mobile uses bottom sheet */
+  .pos-layout-main {
+    @apply flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden;
+    @apply pb-[4.5rem] lg:pb-0 lg:pe-[var(--order-panel-width)];
+  }
+
+  .pos-order-panel {
+    @apply bg-card border-border text-card-foreground flex flex-col z-30;
+    @apply fixed inset-x-0 bottom-[4.5rem] max-h-[min(72vh,100%)] border-t shadow-2xl rounded-t-xl;
+    @apply lg:rounded-none lg:inset-auto lg:bottom-auto lg:end-0 lg:top-16 lg:w-[var(--order-panel-width)] lg:max-h-none lg:h-[calc(100vh-4rem)] lg:border-s lg:shadow-none;
+  }
+
+  .pos-order-panel-backdrop {
+    @apply fixed inset-0 z-20 bg-black/50 lg:hidden;
+  }
+
+  .pos-detail-panel {
+    @apply bg-card border-border text-card-foreground flex flex-col z-30;
+    @apply fixed inset-0 z-40 lg:inset-auto lg:end-0 lg:top-16 lg:w-[var(--order-panel-width)] lg:h-[calc(100vh-4rem)] lg:border-s;
+  }
+
+  .pos-status-bar-mobile {
+    @apply lg:hidden shrink-0 border-b border-border bg-card px-2 py-2 overflow-x-auto pos-scrollbar;
+  }
+
+  .pos-status-bar-mobile-inner {
+    @apply flex gap-2 min-w-min;
+  }
+
+  .pos-status-chip {
+    @apply shrink-0 flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium border transition-colors whitespace-nowrap;
+  }
+
+  .pos-status-chip-active {
+    @apply bg-primary/15 border-primary text-primary;
+  }
+
+  .pos-status-chip-inactive {
+    @apply bg-secondary border-border text-muted-foreground;
+  }
 }

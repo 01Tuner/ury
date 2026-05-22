@@ -287,8 +287,9 @@ def sync_order(
         frappe.throw(f"Error while updating order: {e}")   
 
 
+    created_kots = []
     try:
-        kot_execute(invoice.name, customer, table, items, past_item, comments)
+        created_kots = kot_execute(invoice.name, customer, table, items, past_item, comments) or []
 
     except Exception as e:
         # If an exception occurs (e.g., "kot" app not found), it will be caught here without affect the code execution.
@@ -302,7 +303,9 @@ def sync_order(
         )
 
     invoice.db_set("owner", owner)
-    return invoice.as_dict()
+    invoice_dict = invoice.as_dict()
+    invoice_dict["created_kots"] = created_kots
+    return invoice_dict
 
 
 @frappe.whitelist()

@@ -4,6 +4,7 @@
 import frappe
 import requests
 import json
+from frappe.utils import cint
 from frappe.utils.print_format import print_by_server
 from frappe.model.document import Document
 
@@ -18,6 +19,9 @@ class URYKOT(Document):
 
     # Function for printing multiple KOTs.
     def multi_print_kot(self):
+        if cint(frappe.db.get_value("POS Profile", self.pos_profile, "qz_print")):
+            return
+
         # Function for printing a KOT on a specified printer using a print format.
         def print_kot(printer, kot_print_format):
             try:

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Edit, FrownIcon, Plus, Loader2, MessageSquare } from 'lucide-react';
+import { Trash2, Edit, FrownIcon, Plus, Loader2, MessageSquare, ShoppingCart, X } from 'lucide-react';
 import { usePOSStore } from '../store/pos-store';
 import { formatCurrency, cn } from '../lib/utils';
 import { CustomerSelect } from './CustomerSelect';
@@ -8,7 +8,8 @@ import OrderTypeSelect from './OrderTypeSelect';
 import CommentDialog from './CommentDialog';
 import { Button } from './ui/button';
 import { Spinner } from './ui/spinner';
-import { syncOrder } from '../lib/order-api';
+import { syncOrder, type SyncOrderResponse } from '../lib/order-api';
+import { printKotsWithQz } from '../lib/print-kot-qz';
 import { useRootStore } from '../store/root-store';
 import type { RootState } from '../store/root-store';
 import { showToast } from './ui/toast';
@@ -41,6 +42,9 @@ const OrderPanel = () => {
   const [editingItem, setEditingItem] = useState<typeof activeOrders[0] | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
+
+  const cartItemCount = activeOrders.reduce((sum, item) => sum + item.quantity, 0);
 
   const calculateItemTotal = (item: typeof activeOrders[0]) => {
     const basePrice = item.selectedVariant?.price || item.price;
@@ -120,8 +124,51 @@ const OrderPanel = () => {
         comments: orderComment || undefined
       };
 
-      await syncOrder(orderData);
-      
+      const syncRes = await syncOrder(orderData);
+      const syncPayload =
+        (syncRes as { message?: SyncOrderResponse }).message ??
+        (syncRes as SyncOrderResponse);
+
+      if (
+        Number(posProfile.qz_print) === 1 &&
+        posProfile.qz_host &&
+        syncPayload.created_kots?.length
+      ) {
+        const kotFormat = posProfile.kot_print_format;
+        if (!kotFormat) {
+          showToast.info(t('printer_mapping.kot_format_missing'));
+        } else {
+          try {
+            const { printed, skipped } = await printKotsWithQz({
+              host: posProfile.qz_host,
+              kots: syncPayload.created_kots,
+              posProfileName: posProfile.name,
+              kotPrintFormat: kotFormat,
+            });
+            if (printed > 0) {
+              showToast.success(
+                t('printer_mapping.kot_print_success', { count: String(printed) })
+              );
+            }
+            if (skipped > 0) {
+              showToast.info(
+                t('printer_mapping.kot_print_skipped', { count: String(skipped) })
+              );
+            }
+          } catch (kotPrintErr) {
+            console.error('KOT QZ print failed:', kotPrintErr);
+            showToast.error(
+              t('printer_mapping.kot_print_failed', {
+                reason:
+                  kotPrintErr instanceof Error
+                    ? kotPrintErr.message
+                    : String(kotPrintErr),
+              })
+            );
+          }
+        }
+      }
+
       // Reset all states after successful order submission
       resetOrderState();
       showToast.success(isUpdatingOrder ? t('success.order_updated') : t('success.order_created'));
@@ -180,8 +227,54 @@ const OrderPanel = () => {
   const isInteractionDisabled = isOrderInteractionDisabled() || isSubmitting;
 
   return (
-    <div className="w-96 bg-card border-s border-border flex flex-col h-[calc(100vh-4rem)] fixed end-0 z-10">
+    <>
+      {mobileCartOpen && (
+        <button
+          type="button"
+          className="pos-order-panel-backdrop"
+          aria-label={t('common.close')}
+          onClick={() => setMobileCartOpen(false)}
+        />
+      )}
+
+      <button
+        type="button"
+        onClick={() => setMobileCartOpen(true)}
+        className={cn(
+          'lg:hidden fixed end-4 bottom-[5.25rem] z-20 flex items-center gap-2 rounded-full',
+          'bg-primary text-primary-foreground shadow-lg px-4 py-3 font-semibold text-sm'
+        )}
+        aria-label={t('cart.open_cart')}
+      >
+        <ShoppingCart className="w-5 h-5" />
+        <span>{t('cart.title')}</span>
+        {cartItemCount > 0 && (
+          <span className="bg-primary-foreground text-primary rounded-full min-w-[1.25rem] h-5 px-1 text-xs flex items-center justify-center">
+            {cartItemCount}
+          </span>
+        )}
+      </button>
+
+      <div
+        className={cn(
+          'pos-order-panel',
+          mobileCartOpen ? 'flex' : 'hidden lg:flex'
+        )}
+      >
       <div className="p-4 border-b border-border flex-shrink-0">
+        <div className="flex items-center justify-between gap-2 mb-2 lg:hidden">
+          <span className="font-semibold text-foreground">{t('cart.title')}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setMobileCartOpen(false)}
+            aria-label={t('common.close')}
+          >
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
         <OrderTypeSelect disabled={isInteractionDisabled} />
         <div className="mt-3"><CustomerSelect disabled={isInteractionDisabled} /></div>
       </div>
@@ -347,6 +440,7 @@ const OrderPanel = () => {
         initialComment={orderComment}
       />
     </div>
+    </>
   );
 };
 

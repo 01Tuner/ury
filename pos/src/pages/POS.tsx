@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { t } from '../i18n';
 import { Star, TrendingUp } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
+import MobileCategoryBar from '../components/MobileCategoryBar';
 import OrderPanel from '../components/OrderPanel';
 import ProductDialog from '../components/ProductDialog';
 import MenuList from '../components/MenuList';
@@ -121,12 +122,13 @@ export default function POS() {
   }
 
   return (
-    <div className="flex flex-1 overflow-hidden">
+    <div className="flex flex-1 min-h-0 overflow-hidden">
       <Sidebar disabled={isMenuInteractionDisabled()} />
-      <div className="flex-1 flex flex-col h-screen overflow-hidden pe-96">
-        <div className="p-4 pos-toolbar">
+      <div className="pos-layout-main">
+        <MobileCategoryBar disabled={isMenuInteractionDisabled()} />
+        <div className="p-3 sm:p-4 pos-toolbar shrink-0">
           <div className="max-w-screen-xl mx-auto space-y-3">
-            <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden">
+            <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden overscroll-contain pos-scrollbar">
               {/* <SearchBar
                 value={searchQuery}
                 onChange={setSearchQuery}
