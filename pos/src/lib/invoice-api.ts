@@ -1,5 +1,6 @@
 import { call } from './frappe-sdk';
 import { OrderType } from '../data/order-types';
+import type { PrintHtmlAndStyle } from './qz-print-document';
 
 export interface POSInvoice {
   name: string;
@@ -124,42 +125,50 @@ export async function searchPosInvoice(query: string, status: string) {
   }
 } 
 
-export async function getKotPrintHtml(kotName: string, printFormat: string) {
+export type { PrintHtmlAndStyle } from './qz-print-document';
+
+async function fetchPrintHtmlAndStyle(
+  doc: string,
+  name: string,
+  printFormat: string
+): Promise<PrintHtmlAndStyle> {
+  const response = await call.get<{ message: PrintHtmlAndStyle }>(
+    'frappe.www.printview.get_html_and_style',
+    {
+      doc,
+      name,
+      print_format: printFormat,
+      _lang: 'en',
+      no_letterhead: 1,
+      letterhead: 'No Letterhead',
+      settings: {},
+    }
+  );
+  const { html, style } = response.message;
+  if (!html) {
+    throw new Error('Print HTML is empty');
+  }
+  return { html, style: style ?? '' };
+}
+
+export async function getKotPrintHtml(
+  kotName: string,
+  printFormat: string
+): Promise<PrintHtmlAndStyle> {
   try {
-    const response = await call.get<{ message: { html: string } }>(
-      'frappe.www.printview.get_html_and_style',
-      {
-        doc: 'URY KOT',
-        name: kotName,
-        print_format: printFormat,
-        _lang: 'en',
-        no_letterhead: 1,
-        letterhead: 'No Letterhead',
-        settings: {},
-      }
-    );
-    return response.message.html;
+    return await fetchPrintHtmlAndStyle('URY KOT', kotName, printFormat);
   } catch (error) {
     console.error('Error fetching KOT print HTML:', error);
     throw new Error('Failed to fetch KOT print HTML');
   }
 }
 
-export async function getInvoicePrintHtml(invoiceId: string, printFormat: string) {
+export async function getInvoicePrintHtml(
+  invoiceId: string,
+  printFormat: string
+): Promise<PrintHtmlAndStyle> {
   try {
-    const response = await call.get<{ message: { html: string } }>(
-      'frappe.www.printview.get_html_and_style',
-      {
-        doc: 'POS Invoice',
-        name: invoiceId,
-        print_format: printFormat,
-        _lang: 'en',
-        no_letterhead: 1,
-        letterhead:"No Letterhead",
-        settings:{}
-      }
-    );
-    return response.message.html;
+    return await fetchPrintHtmlAndStyle('POS Invoice', invoiceId, printFormat);
   } catch (error) {
     console.error('Error fetching invoice print HTML:', error);
     throw new Error('Failed to fetch invoice print HTML');

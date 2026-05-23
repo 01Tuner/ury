@@ -1,6 +1,8 @@
 import { getKotPrintHtml } from './invoice-api';
 import { printWithQz } from './print-qz';
+import { buildQzPrintDocument } from './qz-print-document';
 import { getProductionPrinter } from './qz-printer-mapping';
+import { getActiveDirection, getActiveLanguage } from '../i18n';
 
 export interface CreatedKot {
   name: string;
@@ -28,8 +30,14 @@ export async function printKotsWithQz({
       continue;
     }
 
-    const html = await getKotPrintHtml(kot.name, kotPrintFormat);
-    await printWithQz(host, html, printer);
+    const { html, style } = await getKotPrintHtml(kot.name, kotPrintFormat);
+    const documentHtml = await buildQzPrintDocument({
+      html,
+      style,
+      lang: getActiveLanguage(),
+      rtl: getActiveDirection() === 'rtl',
+    });
+    await printWithQz(host, documentHtml, printer);
     printed += 1;
   }
 

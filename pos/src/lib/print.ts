@@ -5,10 +5,11 @@ import {
   selectNetworkPrinter,
   updatePrintStatus
 } from './invoice-api';
+import { buildQzPrintDocument } from './qz-print-document';
 import { PosProfileCombined } from './pos-profile-api';
 import { getBillPrinter } from './qz-printer-mapping';
 import { showToast } from '../components/ui/toast';
-import { t } from '../i18n';
+import { getActiveDirection, getActiveLanguage, t } from '../i18n';
 
 interface PrintOrderParams {
   orderId: string;
@@ -22,12 +23,18 @@ export async function printOrder({ orderId, posProfile }: PrintOrderParams): Pro
     if (!qz_host) {
       throw new Error('QZ host is not set');
     }
-    const html = await getInvoicePrintHtml(orderId, print_format as string);
+    const { html, style } = await getInvoicePrintHtml(orderId, print_format as string);
+    const documentHtml = await buildQzPrintDocument({
+      html,
+      style,
+      lang: getActiveLanguage(),
+      rtl: getActiveDirection() === 'rtl',
+    });
     const billPrinter = getBillPrinter(name);
     if (!billPrinter) {
       showToast.info(t('printer_mapping.bill_printer_fallback'));
     }
-    await printWithQz(qz_host, html, billPrinter ?? undefined);
+    await printWithQz(qz_host, documentHtml, billPrinter ?? undefined);
     await updatePrintStatus(orderId);
     return 'qz';
   } else if (print_type === 'network') {

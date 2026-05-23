@@ -66,7 +66,14 @@ export async function printWithQz(
       printerName && printerName.length > 0
         ? printerName
         : await qz.printers.getDefault();
-    const data = [{ type: 'html', format: 'plain', data: htmlToPrint }];
+    const data = [
+      {
+        type: 'pixel',
+        format: 'html',
+        flavor: 'plain',
+        data: htmlToPrint,
+      },
+    ];
     const config = qz.configs.create(printer);
     await qz.print(config, data as Parameters<typeof qz.print>[1]);
   };

@@ -6,7 +6,11 @@ import { CurrencyAmount } from './CurrencyAmount';
 import { Button, Input, Dialog, DialogContent } from './ui';
 import { call } from '../lib/frappe-sdk';
 import { printOrder } from '../lib/print';
-import { DEFAULT_PAYMENT_MODE } from '../data/order-types';
+import {
+  DEFAULT_PAYMENT_MODE,
+  OrderStatusType,
+  resolveTabAfterPayment,
+} from '../data/order-types';
 import { t } from '../i18n';
 import { showToast } from './ui/toast';
 
@@ -22,8 +26,10 @@ interface PaymentDialogProps {
   table: string | null;
   cashier: string;
   owner: string;
-  fetchOrders: () => Promise<void>;
-  clearSelectedOrder: () => void;
+  followOrderInStatusTab: (
+    invoiceName: string,
+    targetStatus: OrderStatusType
+  ) => Promise<void>;
 }
 
 const PaymentDialog: React.FC<PaymentDialogProps> = ({
@@ -37,8 +43,7 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
   table,
   cashier,
   owner,
-  fetchOrders,
-  clearSelectedOrder
+  followOrderInStatusTab,
 }) => {
   const { paymentModes, fetchPaymentModes, posProfile: storePosProfile } = usePOSStore();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -155,9 +160,12 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
         }
       }
 
+      const targetTab = resolveTabAfterPayment(
+        storePosProfile?.paid_limit,
+        storePosProfile?.view_all_status
+      );
+      await followOrderInStatusTab(invoice, targetTab);
       onClose();
-      clearSelectedOrder();
-      await fetchOrders();
     } catch (err) {
       setError((err as Error).message);
     } finally {

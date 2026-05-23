@@ -34,6 +34,7 @@ export default function Orders() {
     goToPreviousPage,
     selectOrder,
     clearSelectedOrder,
+    followOrderInStatusTab,
     orderSearchQuery
   } = useRootStore();
 
@@ -172,16 +173,11 @@ export default function Orders() {
         posProfile: posStore.posProfile
       });
       showToast.success(t('success.printed'));
-      // Locally update selectedOrder.invoice_printed to 1
+      // Locally update invoice_printed; refresh list without changing tab or clearing selection.
       if (selectedOrder && typeof selectedOrder === 'object') {
-        selectOrder({ ...selectedOrder, invoice_printed: 1 });
+        await selectOrder({ ...selectedOrder, invoice_printed: 1 });
       }
-      // If order was Unbilled, set to Draft and reload draft orders
-      if (selectedStatus === 'Unbilled') {
-        showToast.info(t('success.order_moved_to_draft'));
-        setSelectedStatus('Draft');
-        fetchOrders();
-      }
+      await fetchOrders();
     } catch (err: any) {
       showToast.error(t('errors.print_failed', { reason: err?.message || String(err) }));
     } finally {
@@ -516,8 +512,7 @@ export default function Orders() {
           table={selectedOrder.restaurant_table || null}
           cashier={posStore.posProfile?.cashier || ''}
           owner={posStore.posProfile?.cashier || ''}
-          fetchOrders={fetchOrders}
-          clearSelectedOrder={clearSelectedOrder}
+          followOrderInStatusTab={followOrderInStatusTab}
         />
       )}
     </div>

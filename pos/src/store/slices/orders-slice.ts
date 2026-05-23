@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { OrderType } from '../../data/order-types';
+import { OrderStatusType, OrderType } from '../../data/order-types';
 import { call } from '../../lib/frappe-sdk';
 import { getPOSInvoices, getPOSInvoiceItems, POSInvoiceItem, POSInvoiceTax } from '../../lib/invoice-api';
 import { searchPosInvoice } from '../../lib/invoice-api';
@@ -49,11 +49,42 @@ export interface OrdersActions {
   selectOrder: (order: POSInvoice) => Promise<void>;
   clearSelectedOrder: () => void;
   setOrderSearchQuery: (query: string) => void;
+  followOrderInStatusTab: (
+    invoiceName: string,
+    targetStatus: OrderStatusType
+  ) => Promise<void>;
 }
 
 export type OrdersSlice = OrdersState & OrdersActions;
 
 const ITEMS_PER_PAGE = 10;
+
+function minimalPaidInvoice(
+  name: string,
+  existing?: Partial<POSInvoice> | null
+): POSInvoice {
+  return {
+    name,
+    invoice_printed: existing?.invoice_printed ?? 1,
+    grand_total: existing?.grand_total ?? 0,
+    restaurant_table: existing?.restaurant_table ?? null,
+    cashier: existing?.cashier ?? '',
+    waiter: existing?.waiter ?? '',
+    net_total: existing?.net_total ?? 0,
+    posting_time: existing?.posting_time ?? '',
+    total_taxes_and_charges: existing?.total_taxes_and_charges ?? 0,
+    customer: existing?.customer ?? '',
+    status: 'Paid',
+    mobile_number: existing?.mobile_number ?? '',
+    posting_date: existing?.posting_date ?? '',
+    rounded_total: existing?.rounded_total ?? 0,
+    order_type: (existing?.order_type ?? 'Take Away') as OrderType,
+  };
+}
+
+function invoiceFromSearchHit(hit: Record<string, unknown>): POSInvoice {
+  return minimalPaidInvoice(String(hit.name), hit as Partial<POSInvoice>);
+}
 
 export const createOrdersSlice: StateCreator<
   OrdersSlice,
@@ -82,8 +113,15 @@ export const createOrdersSlice: StateCreator<
   fetchOrders: async (page = 1) => {
     try {
       set({ orderLoading: true, error: null });
-      const { orderSearchQuery, selectedStatus } = get();
-      
+      const { orderSearchQuery, selectedStatus, selectedOrder } = get();
+      const selectedId = selectedOrder?.name;
+
+      const syncSelectedOrder = (orders: POSInvoice[]) => {
+        if (!selectedId) return {};
+        const match = orders.find((order) => order.name === selectedId);
+        return match ? { selectedOrder: match } : {};
+      };
+
       // Get POS profile to access paid_limit
       const posProfile = sessionStorage.getItem('posProfile');
       const profile = posProfile ? JSON.parse(posProfile) : null;
@@ -92,14 +130,16 @@ export const createOrdersSlice: StateCreator<
       if (orderSearchQuery && orderSearchQuery.trim()) {
         // Use search API
         const res = await searchPosInvoice(orderSearchQuery, selectedStatus);
+        const orders = res.data || [];
         set({
-          orders: res.data || [],
+          orders,
           pagination: {
             currentPage: 1,
             hasNextPage: false,
             itemsPerPage: ITEMS_PER_PAGE,
           },
-          orderLoading: false
+          orderLoading: false,
+          ...syncSelectedOrder(orders),
         });
         return;
       }
@@ -119,7 +159,8 @@ export const createOrdersSlice: StateCreator<
           hasNextPage: hasMore,
           itemsPerPage: ITEMS_PER_PAGE,
         },
-        orderLoading: false 
+        orderLoading: false,
+        ...syncSelectedOrder(invoices),
       });
     } catch (error) {
       set({ 
@@ -204,4 +245,72 @@ export const createOrdersSlice: StateCreator<
   },
 
   setOrderSearchQuery: (query) => set({ orderSearchQuery: query }),
+
+  followOrderInStatusTab: async (invoiceName, targetStatus) => {
+    const prior =
+      get().selectedOrder?.name === invoiceName ? get().selectedOrder : null;
+
+    try {
+      set({
+        selectedStatus: targetStatus,
+        orderLoading: true,
+        error: null,
+        orderSearchQuery: '',
+        pagination: {
+          currentPage: 1,
+          hasNextPage: false,
+          itemsPerPage: ITEMS_PER_PAGE,
+        },
+      });
+
+      const posProfile = sessionStorage.getItem('posProfile');
+      const profile = posProfile ? JSON.parse(posProfile) : null;
+      const paidLimit = profile?.paid_limit;
+
+      const { invoices, hasMore } = await getPOSInvoices({
+        status: targetStatus,
+        limit: ITEMS_PER_PAGE,
+        limit_start: 0,
+        paid_limit: paidLimit,
+      });
+
+      let match = invoices.find((order) => order.name === invoiceName);
+      let orders = invoices;
+
+      if (!match) {
+        try {
+          const res = await searchPosInvoice(invoiceName, targetStatus);
+          const hits = (res.data || []) as Record<string, unknown>[];
+          const searchMatch = hits.find((hit) => hit.name === invoiceName);
+          if (searchMatch) {
+            match = invoiceFromSearchHit(searchMatch);
+            orders = [
+              match,
+              ...invoices.filter((order) => order.name !== invoiceName),
+            ];
+          }
+        } catch {
+          /* search is best-effort */
+        }
+      }
+
+      set({
+        orders,
+        pagination: {
+          currentPage: 1,
+          hasNextPage: hasMore,
+          itemsPerPage: ITEMS_PER_PAGE,
+        },
+        orderLoading: false,
+      });
+
+      await get().selectOrder(match ?? minimalPaidInvoice(invoiceName, prior));
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to load orders',
+        orderLoading: false,
+      });
+      await get().selectOrder(minimalPaidInvoice(invoiceName, prior));
+    }
+  },
 }); 

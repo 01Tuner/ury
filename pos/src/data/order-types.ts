@@ -97,3 +97,13 @@ export const getOrderStatusTypes = (viewAllStatus?: number, paidLimit?: number) 
 
 // Legacy export for backward compatibility
 export const ORDER_STATUS_TYPES = BASE_ORDER_STATUS_TYPES;
+
+/** UI tab to open after payment (invoice becomes ERP status Paid). */
+export function resolveTabAfterPayment(
+  paidLimit?: number,
+  viewAllStatus?: number
+): OrderStatusType {
+  if (paidLimit && paidLimit > 0) return 'Recently Paid';
+  if (viewAllStatus === 1) return 'Paid';
+  return 'Recently Paid';
+}
