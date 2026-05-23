@@ -242,6 +242,8 @@
     "occupied": "Occupé",
     "room": "Salle",
     "seats": "Sièges",
+    "bill": "Facturer",
+    "billing": "Facturation...",
     "tap_to_start": "Appuyez pour commencer une nouvelle commande sur place",
     "no_tables_found": "Aucune table trouvée pour cette salle",
     "edit_settings": "Modifier les paramètres de la table",

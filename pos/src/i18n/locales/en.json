@@ -242,6 +242,8 @@
     "occupied": "Occupied",
     "room": "Room",
     "seats": "Seats",
+    "bill": "Bill",
+    "billing": "Billing...",
     "tap_to_start": "Tap to start a new dine-in order",
     "no_tables_found": "No tables found for this room",
     "edit_settings": "Edit Table Settings",

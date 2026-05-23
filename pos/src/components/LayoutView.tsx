@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
-import { CreditCard as Edit3, Save, Users, Move, X, Grid3x3 as Grid3X3, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { CreditCard as Edit3, Loader2, Receipt, Save, Users, Move, X, Grid3x3 as Grid3X3, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { cn, formatInvoiceTime } from '../lib/utils';
 import { Table, updateTableLayout } from '../lib/table-api';
 import { getTableOrder, POSInvoice } from '../lib/order-api';
@@ -12,10 +12,19 @@ interface Props {
   selectedRoom: string;
   tables: Table[];
   onBackToGrid: () => void;
-  onRefresh?: () => void; // Add refresh callback
+  onRefresh?: () => void;
+  onBillTable?: (tableName: string) => void;
+  billingTableName?: string | null;
 }
 
-const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRefresh }) => {
+const LayoutView: React.FC<Props> = ({
+  selectedRoom,
+  tables,
+  onBackToGrid,
+  onRefresh,
+  onBillTable,
+  billingTableName,
+}) => {
   const isRTL = document.dir === 'rtl';
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -545,7 +554,7 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
 
             {/* Show current bill info if table is occupied */}
             {selectedTableData.latest_invoice_time && (
-              <div className="pt-3 border-t border-border">
+              <div className="pt-3 border-t border-border space-y-3">
                 <label className="block text-sm font-medium mb-2">{t('tables.current_bill')}</label>
                 <div className="bg-primary/10 border border-primary/20 p-3 rounded-md text-sm">
                   <div className="flex justify-between mb-1">
@@ -561,6 +570,26 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
                     </div>
                   )}
                 </div>
+                {onBillTable && selectedTableOrder && (
+                  <Button
+                    type="button"
+                    className="w-full"
+                    disabled={billingTableName === selectedTableData.name}
+                    onClick={() => onBillTable(selectedTableData.name)}
+                  >
+                    {billingTableName === selectedTableData.name ? (
+                      <>
+                        <Loader2 className="w-4 h-4 me-2 animate-spin" />
+                        {t('tables.billing')}
+                      </>
+                    ) : (
+                      <>
+                        <Receipt className="w-4 h-4 me-2" />
+                        {t('tables.bill')}
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             )}
 

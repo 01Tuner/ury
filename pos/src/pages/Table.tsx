@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, Eye, Layout, Loader2, Printer, Square, Users } from 'lucide-react';
+import { AlertTriangle, Eye, Layout, Loader2, Receipt, Square, Users } from 'lucide-react';
 import { cn, formatInvoiceTime } from '../lib/utils';
 import { usePOSStore } from '../store/pos-store';
 import { getRooms, getTables, getTableCount ,type Room, type Table } from '../lib/table-api';
@@ -9,10 +9,11 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { DINE_IN } from '../data/order-types';
 import { TableShapeIcon } from '../components/TableShapeIcon';
-import { getTableOrder } from '../lib/order-api';
+import { getTableOrder, POSInvoice } from '../lib/order-api';
 import { printOrder } from '../lib/print';
 import { showToast } from '../components/ui/toast';
 import { t } from '../i18n';
+import PaymentDialog from '../components/PaymentDialog';
 
 import LayoutView from '../components/LayoutView';
 
@@ -32,7 +33,9 @@ const TableView = () => {
   const [roomCounts, setRoomCounts] = useState<Record<string, number>>({});
   const [loadingRoomCounts, setLoadingRoomCounts] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [printingTable, setPrintingTable] = useState<string | null>(null);
+  const [billingTable, setBillingTable] = useState<string | null>(null);
+  const [paymentInvoice, setPaymentInvoice] = useState<POSInvoice | null>(null);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   const persistRoomCounts = useCallback((counts: Record<string, number>) => {
     if (!branch) return;
@@ -159,32 +162,55 @@ const TableView = () => {
     handleNavigateToPOS(table.name);
   };
 
-  const handlePrintTable = async (table: Table, event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-
+  const handleBillTable = async (tableName: string) => {
     if (!posProfile) {
       showToast.error('POS profile not loaded yet');
       return;
     }
 
-    setPrintingTable(table.name);
+    setBillingTable(tableName);
     try {
-      const orderResponse = await getTableOrder(table.name);
-      const invoiceId = orderResponse.message?.name;
+      const orderResponse = await getTableOrder(tableName);
+      const invoice = orderResponse.message;
 
-      if (!invoiceId) {
-        showToast.error('No active order found for this table');
+      if (!invoice?.name) {
+        showToast.error(t('tables.no_active_order'));
         return;
       }
 
-      await printOrder({ orderId: invoiceId, posProfile });
-      showToast.success('Printed successfully');
-      await loadTables(table.restaurant_room, { useCache: false });
+      await printOrder({ orderId: invoice.name, posProfile });
+      showToast.success(t('success.printed'));
+
+      setPaymentInvoice({
+        ...invoice,
+        invoice_printed: 1,
+        rounded_total: invoice.rounded_total ?? invoice.grand_total,
+      });
+      setShowPaymentDialog(true);
     } catch (error) {
-      showToast.error(error instanceof Error ? error.message : 'Failed to print order');
+      showToast.error(
+        error instanceof Error ? error.message : t('errors.failed_print')
+      );
     } finally {
-      setPrintingTable(null);
+      setBillingTable(null);
     }
+  };
+
+  const handleBillTableClick = (table: Table, event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    void handleBillTable(table.name);
+  };
+
+  const handlePaymentDialogClose = () => {
+    setShowPaymentDialog(false);
+    setPaymentInvoice(null);
+  };
+
+  const handleTablePaymentSuccess = async () => {
+    if (selectedRoom) {
+      await loadTables(selectedRoom, { useCache: false });
+    }
+    setPaymentInvoice(null);
   };
 
   const tablesToDisplay = useMemo(() => sortTables(tables), [tables]);
@@ -218,14 +244,36 @@ const TableView = () => {
     setIsLayoutView(true);
   };
 
+  const paymentDialog =
+    showPaymentDialog && paymentInvoice && posProfile ? (
+      <PaymentDialog
+        onClose={handlePaymentDialogClose}
+        grandTotal={paymentInvoice.grand_total}
+        roundedTotal={paymentInvoice.rounded_total ?? paymentInvoice.grand_total}
+        invoice={paymentInvoice.name}
+        invoicePrinted={paymentInvoice.invoice_printed ?? 1}
+        customer={paymentInvoice.customer}
+        posProfile={posProfile.name}
+        table={paymentInvoice.restaurant_table || null}
+        cashier={posProfile.cashier || ''}
+        owner={posProfile.cashier || ''}
+        onPaymentSuccess={handleTablePaymentSuccess}
+      />
+    ) : null;
+
   if (isLayoutView && selectedRoom) {
     return (
-      <LayoutView
-        selectedRoom={selectedRoom}
-        tables={tablesToDisplay}
-        onBackToGrid={() => setIsLayoutView(false)}
-        onRefresh={() => loadTables(selectedRoom, { useCache: false })}
-      />
+      <>
+        <LayoutView
+          selectedRoom={selectedRoom}
+          tables={tablesToDisplay}
+          onBackToGrid={() => setIsLayoutView(false)}
+          onRefresh={() => loadTables(selectedRoom, { useCache: false })}
+          onBillTable={handleBillTable}
+          billingTableName={billingTable}
+        />
+        {paymentDialog}
+      </>
     );
   }
 
@@ -365,19 +413,19 @@ const TableView = () => {
                           Preview
                         </button>
                         <button
-                          onClick={(event) => handlePrintTable(table, event)}
-                          disabled={printingTable === table.name}
+                          onClick={(event) => handleBillTableClick(table, event)}
+                          disabled={billingTable === table.name}
                           className="flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded bg-secondary hover:bg-accent text-foreground transition disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                          {printingTable === table.name ? (
+                          {billingTable === table.name ? (
                             <>
                               <Loader2 className="w-3 h-3 animate-spin" />
-                              Printing...
+                              {t('tables.billing')}
                             </>
                           ) : (
                             <>
-                              <Printer className="w-3 h-3" />
-                              Print
+                              <Receipt className="w-3 h-3" />
+                              {t('tables.bill')}
                             </>
                           )}
                         </button>
@@ -408,6 +456,7 @@ const TableView = () => {
           </div>
         </div>
       </div>
+      {paymentDialog}
     </div>
   );
 };

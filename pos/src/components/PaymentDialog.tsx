@@ -26,10 +26,11 @@ interface PaymentDialogProps {
   table: string | null;
   cashier: string;
   owner: string;
-  followOrderInStatusTab: (
+  followOrderInStatusTab?: (
     invoiceName: string,
     targetStatus: OrderStatusType
   ) => Promise<void>;
+  onPaymentSuccess?: () => Promise<void>;
 }
 
 const PaymentDialog: React.FC<PaymentDialogProps> = ({
@@ -44,6 +45,7 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
   cashier,
   owner,
   followOrderInStatusTab,
+  onPaymentSuccess,
 }) => {
   const { paymentModes, fetchPaymentModes, posProfile: storePosProfile } = usePOSStore();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -160,11 +162,15 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
         }
       }
 
-      const targetTab = resolveTabAfterPayment(
-        storePosProfile?.paid_limit,
-        storePosProfile?.view_all_status
-      );
-      await followOrderInStatusTab(invoice, targetTab);
+      if (onPaymentSuccess) {
+        await onPaymentSuccess();
+      } else if (followOrderInStatusTab) {
+        const targetTab = resolveTabAfterPayment(
+          storePosProfile?.paid_limit,
+          storePosProfile?.view_all_status
+        );
+        await followOrderInStatusTab(invoice, targetTab);
+      }
       onClose();
     } catch (err) {
       setError((err as Error).message);
