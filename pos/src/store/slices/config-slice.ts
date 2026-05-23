@@ -1,6 +1,7 @@
 import { StateCreator } from 'zustand';
 import { AuthSlice } from './auth-slice';
 import { getCombinedPosProfile, PosProfileCombined } from '../../lib/pos-profile-api';
+import { parseFrappeError, showFrappeServerErrorPopup } from '../../lib/frappe-error';
 
 interface RolePermission {
   name: string;
@@ -78,8 +79,9 @@ export const createConfigSlice: StateCreator<
       get().setAllowedRoles(allowedRoles);
       set({ isLoading: false });
     } catch (error) {
-      set({ 
-        error: (error as Error).message,
+      showFrappeServerErrorPopup(error);
+      set({
+        error: parseFrappeError(error),
         isLoading: false,
       });
     }

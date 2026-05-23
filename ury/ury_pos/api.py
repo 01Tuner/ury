@@ -685,6 +685,23 @@ def posOpening():
 
 
 @frappe.whitelist()
+def get_active_pos_opening_entry(pos_profile=None):
+    """Return the latest open POS Opening Entry for the current branch (and optional POS profile)."""
+    branchName = getBranch()
+    filters = {"branch": branchName, "status": "Open", "docstatus": 1}
+    if pos_profile:
+        filters["pos_profile"] = pos_profile
+    entries = frappe.get_all(
+        "POS Opening Entry",
+        filters=filters,
+        fields=["name"],
+        order_by="creation desc",
+        limit=1,
+    )
+    return entries[0].name if entries else None
+
+
+@frappe.whitelist()
 def getAggregator():
     branchName = getBranch()
     aggregatorList = frappe.get_all(

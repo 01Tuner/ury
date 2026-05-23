@@ -68,7 +68,9 @@ const AuthGuard: React.FC<Props> = ({ children }) => {
         <div className="text-center">
           <div className="text-amber-600 text-xl mb-4">⚠️</div>
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Configuration Error</h2>
-          <p className="text-gray-600">POS Profile not found or not configured.</p>
+          <p className="text-gray-600">
+            {configError || 'POS Profile not found or not configured.'}
+          </p>
         </div>
       </div>
     );

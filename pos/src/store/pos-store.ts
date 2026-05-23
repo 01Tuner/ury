@@ -11,6 +11,11 @@ import {
   getPosProfileDefaultCustomer,
 } from '../lib/customer-api';
 import { getPosProfileLimitedFields } from '../lib/pos-profile-api';
+import {
+  isFrappeErrorDisplayed,
+  parseFrappeError,
+  showFrappeServerErrorPopup,
+} from '../lib/frappe-error';
 import { DEFAULT_ORDER_TYPE, OrderType } from '../data/order-types';
 import { getTableOrder, TableOrder } from '../lib/order-api';
 import { getPaymentModes } from '../lib/payment-api';
@@ -337,7 +342,8 @@ export const usePOSStore = create<POSStore>((set, get) => ({
             await get().fetchCurrencySymbol();
           }
           return;
-        } catch {
+        } catch (error) {
+          showFrappeServerErrorPopup(error);
           /* fall through to full fetch if limited API fails */
         }
       }
@@ -358,9 +364,12 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       }
     } catch (error) {
       console.error('Error fetching POS profile:', error);
-      set({ 
-        error: 'Failed to fetch POS profile',
-        profileLoading: false 
+      if (!isFrappeErrorDisplayed(error)) {
+        showFrappeServerErrorPopup(error);
+      }
+      set({
+        error: parseFrappeError(error),
+        profileLoading: false,
       });
     }
   },

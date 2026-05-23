@@ -26,10 +26,10 @@ export const showToast = {
       className: 'toast-success',
     });
   },
-  error: (message: string) => {
+  error: (message: string, autoClose = 2000) => {
     toast.error(message, {
       position: 'top-right',
-      autoClose: 2000,
+      autoClose,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -60,6 +60,8 @@ export const ToastProvider = () => {
   return (
     <ToastContainer
       position="top-right"
+      style={{ zIndex: 99999 }}
+      toastStyle={{ zIndex: 99999 }}
       autoClose={2000}
       hideProgressBar={false}
       newestOnTop

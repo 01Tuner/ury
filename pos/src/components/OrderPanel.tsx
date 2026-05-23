@@ -13,6 +13,7 @@ import { printKotsWithQz } from '../lib/print-kot-qz';
 import { useRootStore } from '../store/root-store';
 import type { RootState } from '../store/root-store';
 import { showToast } from './ui/toast';
+import { isFrappeErrorDisplayed, parseFrappeError } from '../lib/frappe-error';
 import { DINE_IN } from '../data/order-types';
 import { t } from '../i18n';
 
@@ -174,19 +175,8 @@ const OrderPanel = () => {
       showToast.success(isUpdatingOrder ? t('success.order_updated') : t('success.order_created'));
     } catch (error) {
       console.error('Failed to sync order:', error);
-      // Frappe API error handling
-      if (error && typeof error === 'object' && '_server_messages' in error && typeof (error as any)._server_messages === 'string') {
-        try {
-          const messages = JSON.parse((error as any)._server_messages);
-          const messageObj = JSON.parse(messages[0]);
-          showToast.error(messageObj.message || 'API error');
-        } catch {
-          showToast.error('API error');
-        }
-      } else if (error instanceof Error) {
-        showToast.error(error.message);
-      } else {
-        showToast.error(t('errors.failed_process_order'));
+      if (!isFrappeErrorDisplayed(error)) {
+        showToast.error(parseFrappeError(error) || t('errors.failed_process_order'));
       }
     } finally {
       setIsSubmitting(false);

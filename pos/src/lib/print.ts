@@ -1,7 +1,6 @@
 import { printWithQz } from './print-qz';
 import {
   getInvoicePrintHtml,
-  getClosingEntryPrintHtml,
   networkPrint,
   selectNetworkPrinter,
   updatePrintStatus
@@ -15,8 +14,6 @@ interface PrintOrderParams {
   orderId: string;
   posProfile: PosProfileCombined
 }
-
-const DEFAULT_CLOSING_PRINT_FORMAT = 'Standard';
 
 export async function printOrder({ orderId, posProfile }: PrintOrderParams): Promise<'qz' | 'network' | 'socket'> {
   const { print_type, qz_host, print_format, printer, name, cashier, multiple_cashier } = posProfile;
@@ -52,32 +49,45 @@ export async function printOrder({ orderId, posProfile }: PrintOrderParams): Pro
 interface PrintClosingEntryParams {
   entryName: string;
   posProfile: PosProfileCombined;
-  printFormat?: string;
+}
+
+/** ERPNext Standard print format; layout handled server-side. */
+const CLOSING_PRINT_FORMAT = 'Standard';
+
+function buildClosingPrintUrl(entryName: string, printFormat: string): string {
+  const params = new URLSearchParams({
+    doctype: 'POS Closing Entry',
+    name: entryName,
+    format: printFormat,
+    no_letterhead: '1',
+    letterhead: 'No Letterhead',
+    trigger_print: '1',
+    _lang: 'en',
+    settings: '{}',
+  });
+  return `/printview?${params.toString()}`;
 }
 
 export async function printClosingEntry({
   entryName,
   posProfile,
-  printFormat = DEFAULT_CLOSING_PRINT_FORMAT,
 }: PrintClosingEntryParams): Promise<'qz' | 'network' | 'socket'> {
-  const { print_type, qz_host, printer, name, cashier, multiple_cashier } = posProfile;
-
-  if (print_type === 'qz') {
-    if (!qz_host) {
-      throw new Error('QZ host is not set');
-    }
-    const html = await getClosingEntryPrintHtml(entryName, printFormat);
-    const billPrinter = getBillPrinter(name);
-    await printWithQz(qz_host, html, billPrinter ?? undefined);
-    return 'qz';
-  }
+  const { print_type, printer } = posProfile;
 
   if (print_type === 'network') {
-    await networkPrint(entryName, printer as string, printFormat, 'POS Closing Entry');
+    await networkPrint(
+      entryName,
+      printer as string,
+      CLOSING_PRINT_FORMAT,
+      'POS Closing Entry'
+    );
     return 'network';
   }
 
-  const url = `/printview?doctype=POS Closing Entry&name=${entryName}&format=${printFormat}&no_letterhead=1&settings={}&letterhead=No Letterhead&trigger_print=1&_lang=en`;
-  window.open(url, '_blank', 'noopener,noreferrer');
-  return 'socket';
+  window.open(
+    buildClosingPrintUrl(entryName, CLOSING_PRINT_FORMAT),
+    '_blank',
+    'noopener,noreferrer'
+  );
+  return print_type === 'qz' ? 'qz' : 'socket';
 }

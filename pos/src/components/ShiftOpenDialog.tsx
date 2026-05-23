@@ -12,7 +12,7 @@ import {
 } from './ui';
 import { showToast } from './ui/toast';
 import { t } from '../i18n';
-import { parseFrappeError } from '../lib/frappe-error';
+import { isFrappeErrorDisplayed, parseFrappeError } from '../lib/frappe-error';
 import {
   formatDate,
   formatDateTime,
@@ -40,7 +40,11 @@ const ShiftOpenDialog = ({ open, onComplete }: ShiftOpenDialogProps) => {
     setStartDate(formatDateTimeForInput(new Date()));
     getModeOfPaymentBalances()
       .then(setBalanceDetails)
-      .catch((err) => showToast.error(parseFrappeError(err)))
+      .catch((err) => {
+        if (!isFrappeErrorDisplayed(err)) {
+          showToast.error(parseFrappeError(err));
+        }
+      })
       .finally(() => setLoading(false));
   }, [open]);
 
@@ -73,7 +77,9 @@ const ShiftOpenDialog = ({ open, onComplete }: ShiftOpenDialogProps) => {
       showToast.success(t('shift.open_submitted'));
       onComplete();
     } catch (err) {
-      showToast.error(parseFrappeError(err));
+      if (!isFrappeErrorDisplayed(err)) {
+        showToast.error(parseFrappeError(err));
+      }
     } finally {
       setSubmitting(false);
     }

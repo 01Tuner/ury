@@ -14,7 +14,7 @@ import {
 } from './ui';
 import { showToast } from './ui/toast';
 import { t } from '../i18n';
-import { parseFrappeError } from '../lib/frappe-error';
+import { isFrappeErrorDisplayed, parseFrappeError } from '../lib/frappe-error';
 import { printClosingEntry } from '../lib/print';
 import {
   aggregateClosingData,
@@ -30,6 +30,7 @@ import {
   POSOpeningEntryListItem,
   submitPOSClosingEntry,
 } from '../lib/pos-shift-api';
+import { getActivePosOpeningEntry } from '../lib/pos-opening-api';
 
 interface ShiftCloseDialogProps {
   open: boolean;
@@ -97,15 +98,26 @@ const ShiftCloseDialog = ({
     try {
       const entries = await getOpenPOSOpeningEntries(posProfile.branch, posProfile.name);
       setOpenEntries(entries);
+
+      const activeEntry = await getActivePosOpeningEntry(posProfile.name);
+      if (activeEntry && entries.some((e) => e.name === activeEntry)) {
+        await selectOpeningEntry(activeEntry);
+        return;
+      }
+
       if (autoSelectUnclosed && entries.length > 0) {
         const oldest = [...entries].sort(
           (a, b) =>
             new Date(a.posting_date ?? 0).getTime() - new Date(b.posting_date ?? 0).getTime()
         )[0];
         await selectOpeningEntry(oldest.name);
+      } else if (entries.length === 1) {
+        await selectOpeningEntry(entries[0].name);
       }
     } catch (err) {
-      showToast.error(parseFrappeError(err));
+      if (!isFrappeErrorDisplayed(err)) {
+        showToast.error(parseFrappeError(err));
+      }
     }
   };
 
@@ -150,7 +162,9 @@ const ShiftCloseDialog = ({
       );
       setStatus('creating');
     } catch (err) {
-      showToast.error(parseFrappeError(err));
+      if (!isFrappeErrorDisplayed(err)) {
+        showToast.error(parseFrappeError(err));
+      }
       setStatus('selecting');
     } finally {
       setLoading(false);
@@ -187,7 +201,9 @@ const ShiftCloseDialog = ({
         })
       );
     } catch (err) {
-      showToast.error(parseFrappeError(err));
+      if (!isFrappeErrorDisplayed(err)) {
+        showToast.error(parseFrappeError(err));
+      }
     } finally {
       setLoading(false);
     }
@@ -237,7 +253,9 @@ const ShiftCloseDialog = ({
       setStatus('draft');
       showToast.success(t('shift.close_saved'));
     } catch (err) {
-      showToast.error(parseFrappeError(err));
+      if (!isFrappeErrorDisplayed(err)) {
+        showToast.error(parseFrappeError(err));
+      }
     } finally {
       setSaving(false);
     }
@@ -252,7 +270,9 @@ const ShiftCloseDialog = ({
       setShowSubmitConfirm(false);
       showToast.success(t('shift.close_submitted'));
     } catch (err) {
-      showToast.error(parseFrappeError(err));
+      if (!isFrappeErrorDisplayed(err)) {
+        showToast.error(parseFrappeError(err));
+      }
     } finally {
       setSubmitting(false);
     }

@@ -164,30 +164,6 @@ export async function getInvoicePrintHtml(invoiceId: string, printFormat: string
     console.error('Error fetching invoice print HTML:', error);
     throw new Error('Failed to fetch invoice print HTML');
   }
-} 
-
-export async function getClosingEntryPrintHtml(
-  entryName: string,
-  printFormat: string
-) {
-  try {
-    const response = await call.get<{ message: { html: string } }>(
-      'frappe.www.printview.get_html_and_style',
-      {
-        doc: 'POS Closing Entry',
-        name: entryName,
-        print_format: printFormat,
-        _lang: 'en',
-        no_letterhead: 1,
-        letterhead: 'No Letterhead',
-        settings: {},
-      }
-    );
-    return response.message.html;
-  } catch (error) {
-    console.error('Error fetching closing entry print HTML:', error);
-    throw new Error('Failed to fetch closing entry print HTML');
-  }
 }
 
 export async function networkPrint(

@@ -21,6 +21,21 @@ export const checkPOSOpening = async (): Promise<POSOpeningResponse> => {
   }
 };
 
+export const getActivePosOpeningEntry = async (
+  posProfile?: string
+): Promise<string | null> => {
+  try {
+    const response = await call.get<{ message: string | null }>(
+      'ury.ury_pos.api.get_active_pos_opening_entry',
+      posProfile ? { pos_profile: posProfile } : {}
+    );
+    return response.message ?? null;
+  } catch (error) {
+    console.error('Error fetching active POS opening entry:', error);
+    return null;
+  }
+};
+
 export const validatePOSClose = async (posProfile: string): Promise<POSCloseValidationResponse> => {
   try {
     const response = await call.get<POSCloseValidationResponse>(

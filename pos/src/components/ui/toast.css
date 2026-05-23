@@ -1,3 +1,8 @@
+/* Keep above full-screen loaders (AuthGuard, shift dialogs). */
+.Toastify__toast-container {
+  z-index: 99999 !important;
+}
+
 /* Override default toast styles for custom design */
 .Toastify__toast {
   border-radius: 8px !important;
