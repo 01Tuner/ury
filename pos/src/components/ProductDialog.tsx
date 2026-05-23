@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { X, Plus, Minus } from 'lucide-react';
 import { OrderItem, usePOSStore } from '../store/pos-store';
-import { cn, formatCurrency } from '../lib/utils';
+import { cn } from '../lib/utils';
+import { CurrencyAmount } from './CurrencyAmount';
 import { Button, Dialog, DialogContent, Input } from './ui';
 import { db } from '../lib/frappe-sdk';
 import { t } from '../i18n';
@@ -428,7 +429,7 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
                       )}
                     >
                       <div className="font-medium">{variant.name}</div>
-                      <div className="text-sm text-gray-500">{formatCurrency(menuVariant ? Number(menuVariant.price) : 0)}</div>
+                      <CurrencyAmount amount={menuVariant ? Number(menuVariant.price) : 0} className="text-sm text-gray-500" />
                     </button>
                   );
                 })}
@@ -462,7 +463,7 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
                     >
                       <div className="flex justify-between items-center">
                         <span>{addon.name}</span>
-                        <span className="text-sm text-gray-500">+{formatCurrency(Number(addon.price))}</span>
+                        <CurrencyAmount amount={Number(addon.price)} prefix="+" className="text-sm text-gray-500" />
                       </div>
                     </button>
                   ))}
@@ -476,7 +477,7 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
           <div className="mt-auto pt-2 border-t border-gray-200">
             <div className="flex justify-between items-center text-lg font-semibold">
               <span>{t('product_dialog.total')}&nbsp;</span>
-              <span>{formatCurrency(total)}</span>
+              <CurrencyAmount amount={total} />
             </div>
             <Button
               onClick={handleAddToOrder}

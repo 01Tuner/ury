@@ -1,5 +1,6 @@
 import { FC } from 'react';
-import { formatCurrency, cn } from '../lib/utils';
+import { cn } from '../lib/utils';
+import { CurrencyAmount } from './CurrencyAmount';
 
 interface MenuCardProps {
   id: string;
@@ -75,9 +76,7 @@ const MenuCard: FC<MenuCardProps> = ({
 
         {/* Price section - pushed to bottom */}
         <div className="mt-auto pt-2">
-          <span className="text-sm font-semibold text-foreground tabular-nums">
-            {formatCurrency(price)}
-          </span>
+          <CurrencyAmount amount={price} className="text-sm font-semibold text-foreground" />
         </div>
       </div>
     </div>

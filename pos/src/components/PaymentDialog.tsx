@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Percent, Coins } from 'lucide-react';
 import { usePOSStore } from '../store/pos-store';
 import { formatCurrency } from '../lib/utils';
+import { CurrencyAmount } from './CurrencyAmount';
 import { Button, Input, Dialog, DialogContent } from './ui';
 import { call } from '../lib/frappe-sdk';
 import { printOrder } from '../lib/print';
@@ -241,12 +242,14 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
             </div>
             <div className="flex justify-between mt-2 text-sm rounded-lg bg-secondary/80 border border-border px-3 py-2">
               <span className="font-medium text-muted-foreground">{t('payment.total_entered')}</span>
-              <span className="text-[hsl(var(--restro-green))] font-semibold flex items-center gap-1 tabular-nums">
-                {formatCurrency(paymentsTotal)} / {formatCurrency(finalTotal)}
+              <span className="text-[hsl(var(--restro-green))] font-semibold flex items-center gap-1">
+                <CurrencyAmount amount={paymentsTotal} />
+                <span>/</span>
+                <CurrencyAmount amount={finalTotal} />
                 {paymentsTotal > finalTotal && (
                   <span className="text-primary font-semibold flex items-center gap-1">
                     <Coins className="inline w-4 h-4 text-primary" />
-                    <span className="font-bold">{formatCurrency(paymentsTotal - finalTotal)}</span>
+                    <CurrencyAmount amount={paymentsTotal - finalTotal} className="font-bold" />
                   </span>
                 )}
               </span>
@@ -270,29 +273,30 @@ const PaymentDialog: React.FC<PaymentDialogProps> = ({
               {/* Subtotal (Grand Total) */}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t('payment.subtotal')}</span>
-                <span className="text-foreground tabular-nums">{formatCurrency(subtotal)}</span>
+                <CurrencyAmount amount={subtotal} className="text-foreground" />
               </div>
               {/* Discount */}
               {appliedDiscount > 0 && (
                 <div className="flex justify-between text-[hsl(var(--restro-green))]">
                   <span>{t('payment.discount')}</span>
-                  <span className="tabular-nums">-{formatCurrency(appliedDiscount)}</span>
+                  <CurrencyAmount amount={appliedDiscount} prefix="-" />
                 </div>
               )}
               {/* Adjustment (if any) */}
               {showFinalAdjustment && (
                 <div className="flex justify-between text-primary">
                   <span>{t('payment.adjustment')}</span>
-                  <span className="tabular-nums">
-                    {roundedFinalAdjustment > 0 ? '+' : ''}{formatCurrency(roundedFinalAdjustment)}
-                  </span>
+                  <CurrencyAmount
+                    amount={roundedFinalAdjustment}
+                    prefix={roundedFinalAdjustment > 0 ? '+' : ''}
+                  />
                 </div>
               )}
               {/* Final Total (Rounded) */}
               <div className="border-t border-border pt-2 mt-2">
                 <div className="flex justify-between font-semibold text-lg text-foreground">
                   <span>{t('payment.total')}</span>
-                  <span className="text-primary tabular-nums">{formatCurrency(finalTotal)}</span>
+                  <CurrencyAmount amount={finalTotal} className="text-primary" />
                 </div>
               </div>
             </div>

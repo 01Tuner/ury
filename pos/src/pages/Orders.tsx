@@ -5,7 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { showToast } from '../components/ui/toast';
 import OrderStatusSidebar from '../components/OrderStatusSidebar';
 import { useRootStore } from '../store/root-store';
-import { cn, formatCurrency } from '../lib/utils';
+import { cn } from '../lib/utils';
+import { CurrencyAmount } from '../components/CurrencyAmount';
 import { Spinner } from '../components/ui/spinner';
 import { Textarea } from '../components/ui/textarea';
 import { usePOSStore } from '../store/pos-store';
@@ -258,9 +259,10 @@ export default function Orders() {
 
                       {/* Total - pushed to bottom like MenuCard */}
                       <div className="mt-auto pt-2">
-                        <span className="text-sm font-semibold text-foreground tabular-nums">
-                          {formatCurrency(order.rounded_total)}
-                        </span>
+                        <CurrencyAmount
+                          amount={order.rounded_total}
+                          className="text-sm font-semibold text-foreground"
+                        />
                       </div>
                     </div>
                   </CardContent>
@@ -446,9 +448,7 @@ export default function Orders() {
                         <p className="text-xs text-muted-foreground">Qty: {item.qty}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-foreground">
-                          {formatCurrency(item.amount)}
-                        </p>
+                        <CurrencyAmount amount={item.amount} className="text-sm font-semibold text-foreground" />
                       </div>
                     </div>
                   ))}
@@ -463,9 +463,7 @@ export default function Orders() {
                     {selectedOrderTaxes.map((tax, index) => (
                       <div key={index} className="flex justify-between items-center py-1">
                         <span className="text-sm text-muted-foreground">{tax.description}</span>
-                        <span className="text-sm font-medium text-foreground">
-                          {formatCurrency(tax.rate)}
-                        </span>
+                        <CurrencyAmount amount={tax.rate} className="text-sm font-medium text-foreground" />
                       </div>
                     ))}
                   </div>
@@ -497,9 +495,10 @@ export default function Orders() {
                   </Button>
                 )}
                 {/* Total */}
-                <span className="ms-auto text-xl font-bold text-foreground whitespace-nowrap">
-                  {formatCurrency(selectedOrder.rounded_total)}
-                </span>
+                <CurrencyAmount
+                  amount={selectedOrder.rounded_total}
+                  className="ms-auto text-xl font-bold text-foreground whitespace-nowrap"
+                />
               </div>
             </div>
           </>

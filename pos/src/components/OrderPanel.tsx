@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Trash2, Edit, FrownIcon, Plus, Loader2, MessageSquare, ShoppingCart, X } from 'lucide-react';
 import { usePOSStore } from '../store/pos-store';
-import { formatCurrency, cn } from '../lib/utils';
+import { cn } from '../lib/utils';
+import { CurrencyAmount } from './CurrencyAmount';
 import { CustomerSelect } from './CustomerSelect';
 import ProductDialog from './ProductDialog';
 import OrderTypeSelect from './OrderTypeSelect';
@@ -297,7 +298,7 @@ const OrderPanel = () => {
                         {item.selectedAddons.map(addon => addon.name).join(', ')}
                       </p>
                     )}
-                    <p className="text-muted-foreground text-sm">{formatCurrency(calculateItemTotal(item))}</p>
+                    <CurrencyAmount amount={calculateItemTotal(item)} className="text-muted-foreground text-sm" />
                   </div>
                   
                   <div className="flex items-center gap-2">
@@ -384,7 +385,7 @@ const OrderPanel = () => {
                 </Button>
                 <span className="text-lg font-semibold">{t('cart.total')}</span>
               </div>
-              <span className="text-lg font-semibold">{formatCurrency(total)}</span>
+              <CurrencyAmount amount={total} className="text-lg font-semibold" />
             </div>
             <Button
               onClick={handleSubmit}

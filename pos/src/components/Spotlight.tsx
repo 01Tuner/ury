@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Command, X } from 'lucide-react';
 import { usePOSStore } from '../store/pos-store';
-import { cn, formatCurrency } from '../lib/utils';
+import { cn } from '../lib/utils';
+import { CurrencyAmount } from './CurrencyAmount';
 import { Button, Input } from './ui';
 import { Dialog, DialogContent } from './ui/dialog';
 
@@ -105,7 +106,7 @@ const Spotlight = () => {
                   <div className="text-sm text-gray-500">{item.category}</div>
                 </div>
                 <div className="text-end">
-                  <div className="font-medium">{formatCurrency(item.price)}</div>
+                  <CurrencyAmount amount={item.price} className="font-medium" />
                 </div>
               </Button>
             ))
