@@ -10,6 +10,68 @@ export interface BuildQzPrintDocumentOptions {
   rtl?: boolean;
 }
 
+export interface QzPageDimensions {
+  pageWidth?: number;
+  pageHeight?: number;
+}
+
+const MM_PER_INCH = 25.4;
+
+function mmToInches(mm: number): number {
+  return Math.round((mm / MM_PER_INCH) * 100) / 100;
+}
+
+function parseBodyWidthMm(style: string): number | undefined {
+  const bodyBlocks = [...style.matchAll(/body\s*\{([^}]*)\}/gis)];
+  for (const match of bodyBlocks) {
+    const rules = match[1];
+    const maxWidth = rules.match(/max-width:\s*(\d+(?:\.\d+)?)\s*mm/i);
+    if (maxWidth) return parseFloat(maxWidth[1]);
+  }
+  for (const match of bodyBlocks) {
+    const rules = match[1];
+    const minWidth = rules.match(/min-width:\s*(\d+(?:\.\d+)?)\s*mm/i);
+    if (minWidth) return parseFloat(minWidth[1]);
+  }
+  return undefined;
+}
+
+function parsePageSizeMm(style: string): { width?: number; height?: number } {
+  const pageBlocks = [...style.matchAll(/@page\s*\{([^}]*)\}/gis)];
+  for (const match of pageBlocks) {
+    const rules = match[1];
+    const sizeMatch = rules.match(
+      /size:\s*(\d+(?:\.\d+)?)\s*mm(?:\s+(\d+(?:\.\d+)?)\s*mm|\s+auto)?/i
+    );
+    if (sizeMatch) {
+      return {
+        width: parseFloat(sizeMatch[1]),
+        height: sizeMatch[2] ? parseFloat(sizeMatch[2]) : undefined,
+      };
+    }
+  }
+  return {};
+}
+
+/**
+ * Extracts page dimensions from Print Format CSS for QZ Tray HTML rendering.
+ * QZ ignores @page rules; pass the result as options.pageWidth (inches).
+ */
+export function parsePageDimensionsFromStyle(style: string): QzPageDimensions {
+  const bodyWidthMm = parseBodyWidthMm(style);
+  const pageSize = parsePageSizeMm(style);
+  const widthMm = bodyWidthMm ?? pageSize.width;
+
+  const result: QzPageDimensions = {};
+  if (widthMm) {
+    result.pageWidth = mmToInches(widthMm);
+  }
+  if (pageSize.height) {
+    result.pageHeight = mmToInches(pageSize.height);
+  }
+  return result;
+}
+
 const printBundleCssCache = new Map<string, string | null>();
 
 async function resolvePrintBundleCssUrl(rtl: boolean): Promise<string | null> {

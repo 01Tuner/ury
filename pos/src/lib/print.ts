@@ -5,7 +5,7 @@ import {
   selectNetworkPrinter,
   updatePrintStatus
 } from './invoice-api';
-import { buildQzPrintDocument } from './qz-print-document';
+import { buildQzPrintDocument, parsePageDimensionsFromStyle } from './qz-print-document';
 import { PosProfileCombined } from './pos-profile-api';
 import { getBillPrinter } from './qz-printer-mapping';
 import { showToast } from '../components/ui/toast';
@@ -24,6 +24,7 @@ export async function printOrder({ orderId, posProfile }: PrintOrderParams): Pro
       throw new Error('QZ host is not set');
     }
     const { html, style } = await getInvoicePrintHtml(orderId, print_format as string);
+    const pageDims = parsePageDimensionsFromStyle(style);
     const documentHtml = await buildQzPrintDocument({
       html,
       style,
@@ -34,7 +35,7 @@ export async function printOrder({ orderId, posProfile }: PrintOrderParams): Pro
     if (!billPrinter) {
       showToast.info(t('printer_mapping.bill_printer_fallback'));
     }
-    await printWithQz(qz_host, documentHtml, billPrinter ?? undefined);
+    await printWithQz(qz_host, documentHtml, billPrinter ?? undefined, pageDims);
     await updatePrintStatus(orderId);
     return 'qz';
   } else if (print_type === 'network') {

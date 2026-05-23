@@ -8,6 +8,7 @@ import { useRootStore } from '../store/root-store';
 import { cn } from '../lib/utils';
 import { CurrencyAmount } from '../components/CurrencyAmount';
 import { Spinner } from '../components/ui/spinner';
+import { RestaurantLoader } from '../components/ui/restaurant-loader';
 import { Textarea } from '../components/ui/textarea';
 import { usePOSStore } from '../store/pos-store';
 import { useNavigate } from 'react-router-dom';
@@ -479,7 +480,7 @@ export default function Orders() {
                   aria-label="Print"
                   disabled={isPrinting}
                 >
-                  {isPrinting ? <Spinner className="w-5 h-5" hideMessage /> : <Printer className="w-5 h-5" />}
+                  {isPrinting ? <RestaurantLoader size="sm" /> : <Printer className="w-5 h-5" />}
                 </Button>
                 {/* Payment Button - Only show for Draft, Unbilled, and Recently Paid orders */}
                 {(selectedOrder.status === 'Draft' || selectedOrder.status === 'Unbilled' || selectedOrder.status === 'Recently Paid') && (

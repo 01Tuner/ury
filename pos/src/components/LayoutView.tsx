@@ -1,9 +1,10 @@
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
-import { CreditCard as Edit3, Loader2, Receipt, Save, Users, Move, X, Grid3x3 as Grid3X3, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { CreditCard as Edit3, Receipt, Save, Users, Move, X, Grid3x3 as Grid3X3, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { cn, formatInvoiceTime } from '../lib/utils';
 import { Table, updateTableLayout } from '../lib/table-api';
 import { getTableOrder, POSInvoice } from '../lib/order-api';
 import { Button } from './ui';
+import { RestaurantLoader } from './ui/restaurant-loader';
 import { t } from '../i18n';
 
 
@@ -579,7 +580,7 @@ const LayoutView: React.FC<Props> = ({
                   >
                     {billingTableName === selectedTableData.name ? (
                       <>
-                        <Loader2 className="w-4 h-4 me-2 animate-spin" />
+                        <RestaurantLoader size="sm" className="me-2" />
                         {t('tables.billing')}
                       </>
                     ) : (

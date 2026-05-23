@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Edit, FrownIcon, Plus, Loader2, MessageSquare, ShoppingCart, X } from 'lucide-react';
+import { Trash2, Edit, FrownIcon, Plus, MessageSquare, ShoppingCart, X } from 'lucide-react';
 import { usePOSStore } from '../store/pos-store';
 import { cn } from '../lib/utils';
 import { CurrencyAmount } from './CurrencyAmount';
@@ -9,6 +9,7 @@ import OrderTypeSelect from './OrderTypeSelect';
 import CommentDialog from './CommentDialog';
 import { Button } from './ui/button';
 import { Spinner } from './ui/spinner';
+import { RestaurantLoader } from './ui/restaurant-loader';
 import { syncOrder, type SyncOrderResponse } from '../lib/order-api';
 import { printKotsWithQz } from '../lib/print-kot-qz';
 import { useRootStore } from '../store/root-store';
@@ -396,7 +397,7 @@ const OrderPanel = () => {
             >
               {isSubmitting ? (
                 <div className="flex items-center">
-                  <Loader2 className="w-4 h-4 me-2 animate-spin" />
+                  <RestaurantLoader size="sm" className="me-2" />
 
                   {isUpdatingOrder ? t('cart.updating_order') : t('cart.processing_order')}
                 </div>

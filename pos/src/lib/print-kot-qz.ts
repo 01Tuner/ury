@@ -1,6 +1,6 @@
 import { getKotPrintHtml } from './invoice-api';
 import { printWithQz } from './print-qz';
-import { buildQzPrintDocument } from './qz-print-document';
+import { buildQzPrintDocument, parsePageDimensionsFromStyle } from './qz-print-document';
 import { getProductionPrinter } from './qz-printer-mapping';
 import { getActiveDirection, getActiveLanguage } from '../i18n';
 
@@ -31,13 +31,14 @@ export async function printKotsWithQz({
     }
 
     const { html, style } = await getKotPrintHtml(kot.name, kotPrintFormat);
+    const pageDims = parsePageDimensionsFromStyle(style);
     const documentHtml = await buildQzPrintDocument({
       html,
       style,
       lang: getActiveLanguage(),
       rtl: getActiveDirection() === 'rtl',
     });
-    await printWithQz(host, documentHtml, printer);
+    await printWithQz(host, documentHtml, printer, pageDims);
     printed += 1;
   }
 

@@ -12,6 +12,7 @@ import { usePOSStore } from '../store/pos-store';
 import { t } from '../i18n';
 import ShiftOpenDialog from '../components/ShiftOpenDialog';
 import ShiftCloseDialog from '../components/ShiftCloseDialog';
+import { RestaurantLoader } from '../components/ui/restaurant-loader';
 
 interface ShiftContextValue {
   isShiftOpen: boolean;
@@ -115,7 +116,7 @@ export function ShiftProvider({ children }: ShiftProviderProps) {
       {isChecking && (
         <div className="fixed inset-0 bg-background/90 flex items-center justify-center z-[100]">
           <div className="text-center">
-            <div className="pos-spinner w-12 h-12 mx-auto mb-4" />
+            <RestaurantLoader size="lg" className="mx-auto mb-4" />
             <p className="text-muted-foreground">{t('common.checking_pos_status')}</p>
           </div>
         </div>

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, Eye, Layout, Loader2, Receipt, Square, Users } from 'lucide-react';
+import { AlertTriangle, Eye, Layout, Receipt, Square, Users } from 'lucide-react';
 import { cn, formatInvoiceTime } from '../lib/utils';
 import { usePOSStore } from '../store/pos-store';
 import { getRooms, getTables, getTableCount ,type Room, type Table } from '../lib/table-api';
 import { Spinner } from '../components/ui/spinner';
+import { RestaurantLoader } from '../components/ui/restaurant-loader';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { DINE_IN } from '../data/order-types';
@@ -419,7 +420,7 @@ const TableView = () => {
                         >
                           {billingTable === table.name ? (
                             <>
-                              <Loader2 className="w-3 h-3 animate-spin" />
+                              <RestaurantLoader size="sm" />
                               {t('tables.billing')}
                             </>
                           ) : (
