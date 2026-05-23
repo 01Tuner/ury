@@ -34,7 +34,7 @@ const Sidebar = ({ disabled }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "hidden lg:flex w-64 shrink-0 bg-card border-e border-border h-full flex-col",
+      "hidden lg:flex w-64 shrink-0 bg-card border-e border-border min-h-0 h-full flex-col",
       disabled && "opacity-50 pointer-events-none"
     )}>
       {/* Categories List */}

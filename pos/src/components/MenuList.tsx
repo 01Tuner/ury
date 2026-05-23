@@ -43,7 +43,7 @@ const MenuList: React.FC<MenuListProps> = ({ onItemClick }) => {
   const isInteractionDisabled = isMenuInteractionDisabled() || isOrderInteractionDisabled();
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pos-scrollbar pos-surface">
+    <div className="pos-menu-scroll pos-surface">
       <div className="max-w-screen-xl mx-auto p-4 pb-40">
         {menuLoading ? (
           <div className="h-96">

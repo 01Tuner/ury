@@ -34,7 +34,7 @@ function App() {
           <POSOpeningProvider>
             <div className="flex flex-col h-screen pos-shell font-inter">
               <Header />
-              <div className="flex-1 min-h-0 overflow-hidden bg-background">
+              <div className="flex flex-1 min-h-0 flex-col overflow-hidden bg-background">
                 <Routes>
                   <Route path="/" element={<POS/>} />
                   <Route path="/orders" element={<Orders />} />

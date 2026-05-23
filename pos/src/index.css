@@ -203,6 +203,10 @@
     @apply pb-[4.5rem] lg:pb-0 lg:pe-[var(--order-panel-width)];
   }
 
+  .pos-menu-scroll {
+    @apply h-full min-h-0 flex-1 overflow-y-auto overscroll-contain pos-scrollbar;
+  }
+
   .pos-order-panel {
     @apply bg-card border-border text-card-foreground flex flex-col z-30;
     @apply fixed inset-x-0 bottom-[4.5rem] max-h-[min(72vh,100%)] border-t shadow-2xl rounded-t-xl;

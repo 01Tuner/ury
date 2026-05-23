@@ -122,13 +122,13 @@ export default function POS() {
   }
 
   return (
-    <div className="flex flex-1 min-h-0 overflow-hidden">
+    <div className="flex h-full min-h-0 flex-1 overflow-hidden">
       <Sidebar disabled={isMenuInteractionDisabled()} />
       <div className="pos-layout-main">
         <MobileCategoryBar disabled={isMenuInteractionDisabled()} />
         <div className="p-3 sm:p-4 pos-toolbar shrink-0">
           <div className="max-w-screen-xl mx-auto space-y-3">
-            <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden overscroll-contain pos-scrollbar">
+            <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden pos-scrollbar">
               {/* <SearchBar
                 value={searchQuery}
                 onChange={setSearchQuery}
@@ -143,7 +143,9 @@ export default function POS() {
           </div>
         </div>
 
-        <MenuList onItemClick={handleItemClick} />
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <MenuList onItemClick={handleItemClick} />
+        </div>
       </div>
       <OrderPanel />
       {isDialogOpen && <ProductDialog onClose={() => setIsDialogOpen(false)} />}
