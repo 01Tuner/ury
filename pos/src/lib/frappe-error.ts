@@ -7,7 +7,18 @@ type FrappeErrorPayload = {
   message?: string;
   exception?: string;
   exc?: string;
+  exc_type?: string;
 };
+
+function hasFrappeErrorFields(payload: FrappeErrorPayload | null | undefined): boolean {
+  if (!payload || typeof payload !== 'object') return false;
+  return (
+    (typeof payload._server_messages === 'string' && payload._server_messages.length > 0) ||
+    (typeof payload.exception === 'string' && payload.exception.length > 0) ||
+    (typeof payload.exc === 'string' && payload.exc.length > 0) ||
+    typeof payload.exc_type === 'string'
+  );
+}
 
 function getErrorPayload(error: unknown): FrappeErrorPayload | null {
   if (!error || typeof error !== 'object') return null;
@@ -16,17 +27,12 @@ function getErrorPayload(error: unknown): FrappeErrorPayload | null {
     response?: { data?: FrappeErrorPayload };
   };
 
-  if (typeof direct._server_messages === 'string' && direct._server_messages.length > 0) {
+  if (hasFrappeErrorFields(direct)) {
     return direct;
   }
 
   const fromResponse = direct.response?.data;
-  if (
-    fromResponse &&
-    typeof fromResponse === 'object' &&
-    typeof fromResponse._server_messages === 'string' &&
-    fromResponse._server_messages.length > 0
-  ) {
+  if (fromResponse && hasFrappeErrorFields(fromResponse)) {
     return fromResponse;
   }
 
@@ -78,11 +84,11 @@ export function parseFrappeError(error: unknown): string {
   }
 
   if (payload) {
-    if (typeof payload.message === 'string' && payload.message) {
-      return payload.message;
-    }
     if (typeof payload.exception === 'string' && payload.exception) {
       return payload.exception;
+    }
+    if (typeof payload.message === 'string' && payload.message) {
+      return payload.message;
     }
     if (typeof payload.exc === 'string' && payload.exc) {
       return payload.exc;
@@ -113,11 +119,13 @@ export function isFrappeErrorDisplayed(error: unknown): boolean {
 
 function isFrappeApiError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
-  const payload = error as FrappeErrorPayload & { exc_type?: string; httpStatus?: number };
+  const payload = getErrorPayload(error);
+  const direct = error as { httpStatus?: number };
   return (
     hasFrappeServerMessages(error) ||
-    Boolean(payload.exc_type) ||
-    typeof payload.httpStatus === 'number'
+    Boolean(payload?.exception) ||
+    Boolean(payload?.exc_type) ||
+    typeof direct.httpStatus === 'number'
   );
 }
 
