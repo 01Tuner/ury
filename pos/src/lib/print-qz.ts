@@ -54,6 +54,16 @@ export async function listQzPrinters(host: string): Promise<string[]> {
   return defaultPrinter ? [defaultPrinter as string] : [];
 }
 
+/** QZ render settings for thermal receipt printers (layout width stays in Print Format CSS). */
+const QZ_THERMAL_CONFIG = {
+  density: 'best',
+  fallbackDensity: 203,
+  scaleContent: false,
+  margins: 0,
+  colorType: 'grayscale',
+  interpolation: 'nearest-neighbor',
+};
+
 export async function printWithQz(
   host: string,
   htmlContent: string,
@@ -69,12 +79,16 @@ export async function printWithQz(
 
     const data = [
       {
-        type: 'html',
-        format: 'plain',
+        type: 'pixel',
+        format: 'html',
+        flavor: 'plain',
         data: htmlContent,
       },
     ];
-    const config = qz.configs.create(printer);
+    const config = qz.configs.create(
+      printer,
+      QZ_THERMAL_CONFIG as Parameters<typeof qz.configs.create>[1]
+    );
     await qz.print(config, data as Parameters<typeof qz.print>[1]);
   };
 
