@@ -1,15 +1,14 @@
 import { printWithQz } from './print-qz';
 import {
-  getInvoicePrintHtml,
   networkPrint,
   selectNetworkPrinter,
   updatePrintStatus
 } from './invoice-api';
-import { buildQzPrintDocument, parsePageDimensionsFromStyle } from './qz-print-document';
+import { buildPrintViewUrl } from './print-view-url';
 import { PosProfileCombined } from './pos-profile-api';
 import { getBillPrinter } from './qz-printer-mapping';
 import { showToast } from '../components/ui/toast';
-import { getActiveDirection, getActiveLanguage, t } from '../i18n';
+import { getActiveLanguage, t } from '../i18n';
 
 interface PrintOrderParams {
   orderId: string;
@@ -23,19 +22,17 @@ export async function printOrder({ orderId, posProfile }: PrintOrderParams): Pro
     if (!qz_host) {
       throw new Error('QZ host is not set');
     }
-    const { html, style } = await getInvoicePrintHtml(orderId, print_format as string);
-    const pageDims = parsePageDimensionsFromStyle(style);
-    const documentHtml = await buildQzPrintDocument({
-      html,
-      style,
+    const printUrl = buildPrintViewUrl({
+      doctype: 'POS Invoice',
+      name: orderId,
+      printFormat: print_format as string,
       lang: getActiveLanguage(),
-      rtl: getActiveDirection() === 'rtl',
     });
     const billPrinter = getBillPrinter(name);
     if (!billPrinter) {
       showToast.info(t('printer_mapping.bill_printer_fallback'));
     }
-    await printWithQz(qz_host, documentHtml, billPrinter ?? undefined, pageDims);
+    await printWithQz(qz_host, printUrl, billPrinter ?? undefined);
     await updatePrintStatus(orderId);
     return 'qz';
   } else if (print_type === 'network') {
@@ -47,7 +44,13 @@ export async function printOrder({ orderId, posProfile }: PrintOrderParams): Pro
     await updatePrintStatus(orderId);
     return 'network';
   } else {
-    const url = `/printview?doctype=POS Invoice&name=${orderId}&format=${print_format}&no_letterhead=1&settings={}&letterhead=No Letterhead&trigger_print=1&_lang=en`;
+    const url = buildPrintViewUrl({
+      doctype: 'POS Invoice',
+      name: orderId,
+      printFormat: print_format as string,
+      lang: getActiveLanguage(),
+      triggerPrint: true,
+    });
     window.open(url, '_blank', 'noopener,noreferrer');
     await updatePrintStatus(orderId);
     return 'socket';
@@ -60,21 +63,7 @@ interface PrintClosingEntryParams {
 }
 
 /** ERPNext Standard print format; layout handled server-side. */
-const CLOSING_PRINT_FORMAT = 'Standard';
-
-function buildClosingPrintUrl(entryName: string, printFormat: string): string {
-  const params = new URLSearchParams({
-    doctype: 'POS Closing Entry',
-    name: entryName,
-    format: printFormat,
-    no_letterhead: '1',
-    letterhead: 'No Letterhead',
-    trigger_print: '1',
-    _lang: 'en',
-    settings: '{}',
-  });
-  return `/printview?${params.toString()}`;
-}
+const CLOSING_PRINT_FORMAT = '';
 
 export async function printClosingEntry({
   entryName,
@@ -92,10 +81,13 @@ export async function printClosingEntry({
     return 'network';
   }
 
-  window.open(
-    buildClosingPrintUrl(entryName, CLOSING_PRINT_FORMAT),
-    '_blank',
-    'noopener,noreferrer'
-  );
+  const url = buildPrintViewUrl({
+    doctype: 'POS Closing Entry',
+    name: entryName,
+    printFormat: CLOSING_PRINT_FORMAT,
+    lang: getActiveLanguage(),
+    triggerPrint: true,
+  });
+  window.open(url, '_blank', 'noopener,noreferrer');
   return print_type === 'qz' ? 'qz' : 'socket';
 }

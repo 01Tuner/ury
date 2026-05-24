@@ -54,16 +54,10 @@ export async function listQzPrinters(host: string): Promise<string[]> {
   return defaultPrinter ? [defaultPrinter as string] : [];
 }
 
-export interface QzPrintOptions {
-  pageWidth?: number;
-  pageHeight?: number;
-}
-
 export async function printWithQz(
   host: string,
-  htmlToPrint: string,
-  printerName?: string,
-  options?: QzPrintOptions
+  printViewUrl: string,
+  printerName?: string
 ): Promise<void> {
   setupQzSecurity();
 
@@ -73,24 +67,15 @@ export async function printWithQz(
         ? printerName
         : await qz.printers.getDefault();
 
-    const printData: Record<string, unknown> = {
-      type: 'pixel',
-      format: 'html',
-      flavor: 'plain',
-      data: htmlToPrint,
-    };
-
-    if (options?.pageWidth) {
-      printData.options = {
-        pageWidth: options.pageWidth,
-        ...(options.pageHeight && { pageHeight: options.pageHeight }),
-      };
-    }
-
-    const data = [printData];
-    const config = options?.pageWidth
-      ? qz.configs.create(printer, { scaleContent: false })
-      : qz.configs.create(printer);
+    const data = [
+      {
+        type: 'pixel',
+        format: 'html',
+        flavor: 'file',
+        data: printViewUrl,
+      },
+    ];
+    const config = qz.configs.create(printer);
     await qz.print(config, data as Parameters<typeof qz.print>[1]);
   };
 

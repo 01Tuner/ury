@@ -1,0 +1,188 @@
+{% set details = get_pos_closing_print_details(doc) %}
+{% set sales = get_pos_closing_sales_summary(doc) %}
+{% set cashiers = get_pos_closing_cashier_summary(doc) %}
+{% set currency = frappe.db.get_value("Company", doc.company, "default_currency") %}
+
+<style>
+	.pos-closing-summary {
+		font-family: Verdana, Arial, sans-serif;
+		font-size: 11px;
+		color: #000;
+	}
+	.pos-closing-summary .title {
+		text-align: center;
+		font-weight: bold;
+		font-size: 13px;
+		margin: 8px 0 4px;
+		text-transform: uppercase;
+	}
+	.pos-closing-summary .period {
+		text-align: center;
+		font-size: 11px;
+		margin-bottom: 10px;
+	}
+	.pos-closing-summary .section-title {
+		font-weight: bold;
+		font-size: 11px;
+		margin: 12px 0 4px;
+		text-transform: uppercase;
+	}
+	.pos-closing-summary table {
+		width: 100%;
+		border-collapse: collapse;
+		margin-bottom: 8px;
+		font-size: 10px;
+	}
+	.pos-closing-summary th,
+	.pos-closing-summary td {
+		border: 1px solid #000;
+		padding: 2px 4px;
+		vertical-align: top;
+	}
+	.pos-closing-summary th {
+		font-weight: bold;
+		background: #f5f5f5;
+	}
+	.pos-closing-summary .text-right {
+		text-align: right;
+	}
+	.pos-closing-summary .text-center {
+		text-align: center;
+	}
+</style>
+
+<div class="pos-closing-summary">
+	<div class="title">{{ doc.company }}</div>
+	<div class="period">
+		{{ _("POS Summary") }}<br>
+		{{ _("From") }}: {{ doc.get_formatted("period_start_date") }}
+		&nbsp; {{ _("To") }}: {{ doc.get_formatted("period_end_date") }}
+	</div>
+
+	<div class="section-title">{{ _("Item Wise Summary") }}</div>
+	<table>
+		<thead>
+			<tr>
+				<th>{{ _("Item") }}</th>
+				<th>{{ _("Size") }}</th>
+				<th class="text-right">{{ _("Rate") }}</th>
+				<th class="text-right">{{ _("Qty") }}</th>
+				<th class="text-right">{{ _("Total Amt") }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for row in details.item_wise %}
+			<tr>
+				<td>{{ row.item }}</td>
+				<td>{{ row.size or "" }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(row.rate, currency=currency) }}</td>
+				<td class="text-right">{{ frappe.utils.fmt(row.qty, {"precision": 2}) }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(row.amount, currency=currency) }}</td>
+			</tr>
+			{% else %}
+			<tr>
+				<td colspan="5" class="text-center">{{ _("No items") }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<div class="section-title">{{ _("Category Wise Summary") }}</div>
+	<table>
+		<thead>
+			<tr>
+				<th>{{ _("Category") }}</th>
+				<th class="text-right">{{ _("Qty") }}</th>
+				<th class="text-right">{{ _("Total Amt") }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for row in details.category_wise %}
+			<tr>
+				<td>{{ row.category }}</td>
+				<td class="text-right">{{ frappe.utils.fmt(row.qty, {"precision": 2}) }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(row.amount, currency=currency) }}</td>
+			</tr>
+			{% else %}
+			<tr>
+				<td colspan="3" class="text-center">{{ _("No categories") }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<div class="section-title">{{ _("Cashier Summary") }}</div>
+	<table>
+		<thead>
+			<tr>
+				<th>{{ _("Cashier") }}</th>
+				<th class="text-right">{{ _("Cash") }}</th>
+				<th class="text-right">{{ _("Bank") }}</th>
+				<th class="text-right">{{ _("Total") }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for row in cashiers %}
+			<tr>
+				<td>{{ row.cashier }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(row.cash, currency=currency) }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(row.bank, currency=currency) }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(row.total, currency=currency) }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<div class="section-title">{{ _("Sales Summary") }}</div>
+	<table>
+		<thead>
+			<tr>
+				<th class="text-center">{{ _("Sl No.") }}</th>
+				<th>{{ _("Particulars") }}</th>
+				<th class="text-right">{{ _("Amount") }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td class="text-center">1</td>
+				<td>{{ _("Gross Total") }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(sales.gross_total, currency=currency) }}</td>
+			</tr>
+			<tr>
+				<td class="text-center">2</td>
+				<td>{{ _("Discount") }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(sales.discount, currency=currency) }}</td>
+			</tr>
+			<tr>
+				<td class="text-center">3</td>
+				<td>{{ _("VAT Amt") }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(sales.vat_amt, currency=currency) }}</td>
+			</tr>
+			<tr>
+				<td class="text-center">4</td>
+				<td>{{ _("Grand Total") }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(sales.grand_total, currency=currency) }}</td>
+			</tr>
+			<tr>
+				<td class="text-center">5</td>
+				<td>{{ _("Sales Returns") }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(sales.sales_returns, currency=currency) }}</td>
+			</tr>
+			<tr>
+				<td class="text-center">6</td>
+				<td>{{ _("Sales Return VAT Amt") }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(sales.sales_return_vat, currency=currency) }}</td>
+			</tr>
+			<tr>
+				<td class="text-center">7</td>
+				<td>{{ _("Total VAT") }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(sales.total_vat, currency=currency) }}</td>
+			</tr>
+			<tr>
+				<td class="text-center">8</td>
+				<td>{{ _("Total Sales") }}</td>
+				<td class="text-right">{{ frappe.utils.fmt_money(sales.total_sales, currency=currency) }}</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

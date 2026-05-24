@@ -11,6 +11,7 @@ import { Badge } from '../components/ui/badge';
 import { DINE_IN } from '../data/order-types';
 import { TableShapeIcon } from '../components/TableShapeIcon';
 import { getTableOrder, POSInvoice } from '../lib/order-api';
+import { getInvoiceDisplayTotal } from '../lib/invoice-api';
 import { printOrder } from '../lib/print';
 import { showToast } from '../components/ui/toast';
 import { t } from '../i18n';
@@ -185,7 +186,7 @@ const TableView = () => {
       setPaymentInvoice({
         ...invoice,
         invoice_printed: 1,
-        rounded_total: invoice.rounded_total ?? invoice.grand_total,
+        rounded_total: getInvoiceDisplayTotal(invoice),
       });
       setShowPaymentDialog(true);
     } catch (error) {
@@ -250,7 +251,7 @@ const TableView = () => {
       <PaymentDialog
         onClose={handlePaymentDialogClose}
         grandTotal={paymentInvoice.grand_total}
-        roundedTotal={paymentInvoice.rounded_total ?? paymentInvoice.grand_total}
+        roundedTotal={getInvoiceDisplayTotal(paymentInvoice)}
         invoice={paymentInvoice.name}
         invoicePrinted={paymentInvoice.invoice_printed ?? 1}
         customer={paymentInvoice.customer}

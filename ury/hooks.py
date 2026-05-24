@@ -78,10 +78,13 @@ website_route_rules = [
 # ----------
 
 # add methods and filters to jinja environment
-# jinja = {
-# 	"methods": "ury.utils.jinja_methods",
-# 	"filters": "ury.utils.jinja_filters"
-# }
+jinja = {
+	"methods": [
+		"ury.ury.jinja.get_pos_closing_print_details",
+		"ury.ury.jinja.get_pos_closing_cashier_summary",
+		"ury.ury.jinja.get_pos_closing_sales_summary",
+	],
+}
 
 # Installation
 # ------------

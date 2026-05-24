@@ -1,7 +1,14 @@
 import { StateCreator } from 'zustand';
 import { OrderStatusType, OrderType } from '../../data/order-types';
 import { call } from '../../lib/frappe-sdk';
-import { getPOSInvoices, getPOSInvoiceItems, POSInvoiceItem, POSInvoiceTax } from '../../lib/invoice-api';
+import {
+  getPOSInvoices,
+  getPOSInvoiceItems,
+  getInvoiceDisplayTotal,
+  normalizeInvoiceTotals,
+  POSInvoiceItem,
+  POSInvoiceTax,
+} from '../../lib/invoice-api';
 import { searchPosInvoice } from '../../lib/invoice-api';
 
 export interface POSInvoice {
@@ -63,27 +70,35 @@ function minimalPaidInvoice(
   name: string,
   existing?: Partial<POSInvoice> | null
 ): POSInvoice {
+  const grand_total = Number(existing?.grand_total) || 0;
+  const rounded_total = getInvoiceDisplayTotal({
+    grand_total,
+    rounded_total: existing?.rounded_total,
+  });
+
   return {
     name,
     invoice_printed: existing?.invoice_printed ?? 1,
-    grand_total: existing?.grand_total ?? 0,
+    grand_total,
     restaurant_table: existing?.restaurant_table ?? null,
     cashier: existing?.cashier ?? '',
     waiter: existing?.waiter ?? '',
-    net_total: existing?.net_total ?? 0,
+    net_total: Number(existing?.net_total) || 0,
     posting_time: existing?.posting_time ?? '',
-    total_taxes_and_charges: existing?.total_taxes_and_charges ?? 0,
+    total_taxes_and_charges: Number(existing?.total_taxes_and_charges) || 0,
     customer: existing?.customer ?? '',
     status: 'Paid',
     mobile_number: existing?.mobile_number ?? '',
     posting_date: existing?.posting_date ?? '',
-    rounded_total: existing?.rounded_total ?? 0,
+    rounded_total,
     order_type: (existing?.order_type ?? 'Take Away') as OrderType,
   };
 }
 
 function invoiceFromSearchHit(hit: Record<string, unknown>): POSInvoice {
-  return minimalPaidInvoice(String(hit.name), hit as Partial<POSInvoice>);
+  return normalizeInvoiceTotals(
+    minimalPaidInvoice(String(hit.name), hit as Partial<POSInvoice>)
+  );
 }
 
 export const createOrdersSlice: StateCreator<

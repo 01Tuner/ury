@@ -137,10 +137,10 @@ const OrderPanel = () => {
         posProfile.qz_host &&
         syncPayload.created_kots?.length
       ) {
-        const kotFormat = posProfile.kot_print_format;
-        if (!kotFormat) {
-          showToast.info(t('printer_mapping.kot_format_missing'));
-        } else {
+        const kotFormat = posProfile.kot_print_format || '';
+        // if (!kotFormat) {
+        //   showToast.info(t('printer_mapping.kot_format_missing'));
+        // } else {
           try {
             const { printed, skipped } = await printKotsWithQz({
               host: posProfile.qz_host,
@@ -170,7 +170,7 @@ const OrderPanel = () => {
             );
           }
         }
-      }
+      // }
 
       // Reset all states after successful order submission
       resetOrderState();

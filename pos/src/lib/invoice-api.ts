@@ -1,6 +1,5 @@
 import { call } from './frappe-sdk';
 import { OrderType } from '../data/order-types';
-import type { PrintHtmlAndStyle } from './qz-print-document';
 
 export interface POSInvoice {
   name: string;
@@ -49,6 +48,24 @@ interface GetPOSInvoiceItemsResponse {
   message: [POSInvoiceItem[], POSInvoiceTax[]];
 }
 
+/** Matches ERPNext POS Invoice: use rounded_total when set, else grand_total. */
+export function getInvoiceDisplayTotal(invoice: {
+  grand_total?: number | null;
+  rounded_total?: number | null;
+}): number {
+  const rounded = Number(invoice.rounded_total) || 0;
+  const grand = Number(invoice.grand_total) || 0;
+  return rounded || grand;
+}
+
+export function normalizeInvoiceTotals<T extends POSInvoice>(invoice: T): T {
+  return {
+    ...invoice,
+    grand_total: Number(invoice.grand_total) || 0,
+    rounded_total: getInvoiceDisplayTotal(invoice),
+  };
+}
+
 export async function getPOSInvoices({ 
   status, 
   limit, 
@@ -69,7 +86,7 @@ export async function getPOSInvoices({
     );
 
     return {
-      invoices: response.message.data,
+      invoices: response.message.data.map(normalizeInvoiceTotals),
       hasMore: response.message.next
     };
   } catch (error) {
@@ -118,62 +135,16 @@ export async function searchPosInvoice(query: string, status: string) {
       query,
       status,
     });
-    return response.message;
+    const message = response.message as { data?: POSInvoice[]; next?: boolean };
+    return {
+      ...message,
+      data: (message.data || []).map(normalizeInvoiceTotals),
+    };
   } catch (error) {
     console.error('Error searching POS invoices:', error);
     throw error;
   }
 } 
-
-export type { PrintHtmlAndStyle } from './qz-print-document';
-
-async function fetchPrintHtmlAndStyle(
-  doc: string,
-  name: string,
-  printFormat: string
-): Promise<PrintHtmlAndStyle> {
-  const response = await call.get<{ message: PrintHtmlAndStyle }>(
-    'frappe.www.printview.get_html_and_style',
-    {
-      doc,
-      name,
-      print_format: printFormat,
-      _lang: 'en',
-      no_letterhead: 1,
-      letterhead: 'No Letterhead',
-      settings: {},
-    }
-  );
-  const { html, style } = response.message;
-  if (!html) {
-    throw new Error('Print HTML is empty');
-  }
-  return { html, style: style ?? '' };
-}
-
-export async function getKotPrintHtml(
-  kotName: string,
-  printFormat: string
-): Promise<PrintHtmlAndStyle> {
-  try {
-    return await fetchPrintHtmlAndStyle('URY KOT', kotName, printFormat);
-  } catch (error) {
-    console.error('Error fetching KOT print HTML:', error);
-    throw new Error('Failed to fetch KOT print HTML');
-  }
-}
-
-export async function getInvoicePrintHtml(
-  invoiceId: string,
-  printFormat: string
-): Promise<PrintHtmlAndStyle> {
-  try {
-    return await fetchPrintHtmlAndStyle('POS Invoice', invoiceId, printFormat);
-  } catch (error) {
-    console.error('Error fetching invoice print HTML:', error);
-    throw new Error('Failed to fetch invoice print HTML');
-  }
-}
 
 export async function networkPrint(
   docName: string,
