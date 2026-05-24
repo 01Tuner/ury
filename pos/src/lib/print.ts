@@ -69,7 +69,25 @@ export async function printClosingEntry({
   entryName,
   posProfile,
 }: PrintClosingEntryParams): Promise<'qz' | 'network' | 'socket'> {
-  const { print_type, printer } = posProfile;
+  const { print_type, qz_host, printer, name } = posProfile;
+
+  if (print_type === 'qz') {
+    if (!qz_host) {
+      throw new Error('QZ host is not set');
+    }
+    const printHtml = await fetchPrintHtml({
+      doctype: 'POS Closing Entry',
+      name: entryName,
+      printFormat: CLOSING_PRINT_FORMAT,
+      lang: getActiveLanguage(),
+    });
+    const billPrinter = getBillPrinter(name);
+    if (!billPrinter) {
+      showToast.info(t('printer_mapping.bill_printer_fallback'));
+    }
+    await printWithQz(qz_host, printHtml, billPrinter ?? undefined);
+    return 'qz';
+  }
 
   if (print_type === 'network') {
     await networkPrint(
@@ -89,5 +107,5 @@ export async function printClosingEntry({
     triggerPrint: true,
   });
   window.open(url, '_blank', 'noopener,noreferrer');
-  return print_type === 'qz' ? 'qz' : 'socket';
+  return 'socket';
 }

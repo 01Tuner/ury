@@ -253,7 +253,8 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
     const orderItem: OrderItem = {
       ...selectedItem,
       quantity: numericQuantity,
-      price: basePrice
+      price: basePrice,
+      comment: comments,
     };
     addToOrder(orderItem);
 

@@ -40,7 +40,7 @@ interface ShiftCloseDialogProps {
   onClose?: () => void;
 }
 
-type ShiftStatus = 'selecting' | 'loading' | 'creating' | 'draft' | 'submitted';
+type ShiftStatus = 'selecting' | 'loading' | 'creating' | 'submitted';
 
 const ShiftCloseDialog = ({
   open,
@@ -66,7 +66,6 @@ const ShiftCloseDialog = ({
   const [totalInvoices, setTotalInvoices] = useState(0);
   const [status, setStatus] = useState<ShiftStatus>('selecting');
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [printing, setPrinting] = useState(false);
   const [closingEntryName, setClosingEntryName] = useState<string | null>(null);
@@ -229,9 +228,9 @@ const ShiftCloseDialog = ({
     );
   };
 
-  const handleSave = async () => {
+  const handleConfirmSubmit = async () => {
     if (!posProfile || !selectedEntry) return;
-    setSaving(true);
+    setSubmitting(true);
     try {
       const reconciliation = buildPaymentReconciliation(openingBalance, aggregatedPayments);
       const doc = await createPOSClosingEntry({
@@ -249,23 +248,8 @@ const ShiftCloseDialog = ({
         net_total: netTotal,
         total_quantity: totalQty,
       });
+      await submitPOSClosingEntry(doc.name);
       setClosingEntryName(doc.name);
-      setStatus('draft');
-      showToast.success(t('shift.close_saved'));
-    } catch (err) {
-      if (!isFrappeErrorDisplayed(err)) {
-        showToast.error(parseFrappeError(err));
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!closingEntryName) return;
-    setSubmitting(true);
-    try {
-      await submitPOSClosingEntry(closingEntryName);
       setStatus('submitted');
       setShowSubmitConfirm(false);
       showToast.success(t('shift.close_submitted'));
@@ -301,7 +285,7 @@ const ShiftCloseDialog = ({
   if (!posProfile) return null;
 
   const canPickEntry = status === 'selecting' || status === 'creating';
-  const canPrint = !!closingEntryName && (status === 'draft' || status === 'submitted');
+  const canPrint = !!closingEntryName && status === 'submitted';
 
   return (
     <>
@@ -315,9 +299,6 @@ const ShiftCloseDialog = ({
           <DialogHeader className="shrink-0 border-b px-6 py-4">
             <div className="flex items-center gap-3">
               <DialogTitle>{t('shift.close_title')}</DialogTitle>
-              {status === 'draft' && (
-                <Badge variant="destructive">{t('shift.status_draft')}</Badge>
-              )}
               {status === 'submitted' && <Badge>{t('shift.status_submitted')}</Badge>}
             </div>
             <p className="text-sm text-gray-600 mt-2 text-start">
@@ -379,7 +360,7 @@ const ShiftCloseDialog = ({
                   type="datetime-local"
                   value={periodEndDate}
                   onChange={(e) => setPeriodEndDate(e.target.value)}
-                  disabled={status === 'draft' || status === 'submitted'}
+                  disabled={status === 'submitted'}
                 />
               </div>
               <div>
@@ -396,7 +377,7 @@ const ShiftCloseDialog = ({
                   type="time"
                   value={postingTime}
                   onChange={(e) => setPostingTime(e.target.value)}
-                  disabled={status === 'draft' || status === 'submitted'}
+                  disabled={status === 'submitted'}
                   step={1}
                 />
               </div>
@@ -505,14 +486,9 @@ const ShiftCloseDialog = ({
             )}
             {status === 'creating' && (
               <Button
-                onClick={handleSave}
-                disabled={saving || loading || !selectedEntry}
+                onClick={() => setShowSubmitConfirm(true)}
+                disabled={submitting || loading || !selectedEntry}
               >
-                {saving ? t('shift.saving') : t('shift.save')}
-              </Button>
-            )}
-            {status === 'draft' && (
-              <Button onClick={() => setShowSubmitConfirm(true)} disabled={submitting}>
                 {t('shift.submit')}
               </Button>
             )}
@@ -534,13 +510,13 @@ const ShiftCloseDialog = ({
             <DialogTitle>{t('shift.confirm_submit')}</DialogTitle>
           </DialogHeader>
           <p className="text-gray-600 mb-4 px-6">
-            {t('shift.confirm_submit_close', { name: closingEntryName ?? '' })}
+            {t('shift.confirm_submit_close', { name: selectedEntry ?? '' })}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSubmitConfirm(false)}>
               {t('common.cancel')}
             </Button>
-            <Button onClick={handleSubmit} disabled={submitting}>
+            <Button onClick={handleConfirmSubmit} disabled={submitting}>
               {submitting ? t('shift.submitting') : t('shift.yes_submit')}
             </Button>
           </DialogFooter>

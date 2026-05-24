@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { MessageSquare, X } from 'lucide-react';
-import { Button } from './ui';
+import { MessageSquare } from 'lucide-react';
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui';
+import { Textarea } from './ui/textarea';
 import { t } from '../i18n';
 
 interface CommentDialogProps {
@@ -23,60 +24,41 @@ const CommentDialog = ({ isOpen, onClose, onSave, initialComment = '' }: Comment
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">
-              {t('comment.title')}
-            </h2>
-          </div>
-          <Button
-            onClick={handleCancel}
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-        
-        <div className="mb-6">
-          <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
+      <DialogContent onClose={handleCancel}>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-primary" />
+            {t('comment.title')}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="px-6 pb-2">
+          <label htmlFor="comment" className="block text-sm font-medium text-foreground mb-2">
             {t('comment.label')}
           </label>
-          <textarea
+          <Textarea
             id="comment"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder={t('comment.placeholder')}
-            className="w-full h-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+            className="h-32 resize-none"
             autoFocus
           />
         </div>
-        
-        <div className="flex gap-3 justify-end">
-          <Button
-            onClick={handleCancel}
-            variant="outline"
-            className="px-4 py-2"
-          >
+
+        <DialogFooter>
+          <Button onClick={handleCancel} variant="outline">
             {t('common.cancel')}
           </Button>
-          <Button
-            onClick={handleSave}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700"
-          >
+          <Button onClick={handleSave}>
             {t('comment.save_button')}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default CommentDialog; 
+export default CommentDialog;
