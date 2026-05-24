@@ -66,13 +66,11 @@ function wrapPrintDocument(html: string, style: string, lang: string, bundleCss:
 <head>
 <meta charset="utf-8">
 <style type="text/css">
-${bundleCss}
 ${style}
 </style>
 </head>
 <body>
-<div class="print-format-gutter">
-<div class="print-format">${html}</div>
+ ${html}
 </div>
 </body>
 </html>`;
