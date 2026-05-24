@@ -1,5 +1,5 @@
 import { printWithQz } from './print-qz';
-import { buildPrintViewUrl } from './print-view-url';
+import { fetchPrintHtml } from './print-view-url';
 import { getProductionPrinter } from './qz-printer-mapping';
 import { getActiveLanguage } from '../i18n';
 
@@ -29,13 +29,13 @@ export async function printKotsWithQz({
       continue;
     }
 
-    const printUrl = buildPrintViewUrl({
+    const printHtml = await fetchPrintHtml({
       doctype: 'URY KOT',
       name: kot.name,
       printFormat: kotPrintFormat,
       lang: getActiveLanguage(),
     });
-    await printWithQz(host, printUrl, printer);
+    await printWithQz(host, printHtml, printer);
     printed += 1;
   }
 

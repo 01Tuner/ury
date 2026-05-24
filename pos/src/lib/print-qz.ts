@@ -56,7 +56,7 @@ export async function listQzPrinters(host: string): Promise<string[]> {
 
 export async function printWithQz(
   host: string,
-  printViewUrl: string,
+  htmlContent: string,
   printerName?: string
 ): Promise<void> {
   setupQzSecurity();
@@ -69,10 +69,9 @@ export async function printWithQz(
 
     const data = [
       {
-        type: 'pixel',
-        format: 'html',
-        flavor: 'file',
-        data: printViewUrl,
+        type: 'html',
+        format: 'plain',
+        data: htmlContent,
       },
     ];
     const config = qz.configs.create(printer);
