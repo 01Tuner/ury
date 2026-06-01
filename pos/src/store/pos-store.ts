@@ -42,6 +42,8 @@ export interface MenuItem extends Omit<APIMenuItem, 'rate' | 'item_image'> {
   quantity?: number;
   description?: string;
   special_dish?: 1 | 0;
+  isPosVariant?: boolean;
+  hasVariants?: boolean;
   variants?: Array<{ id: string; name: string; price: number }>;
   addons?: Array<{ id: string; name: string; price: number; category: 'sides' | 'drinks' | 'desserts' }>;
   selectedVariant?: { id: string; name: string; price: number };
@@ -409,6 +411,8 @@ export const usePOSStore = create<POSStore>((set, get) => ({
         course_label: item.course_label || item.course,
         description: item.description || '',
         special_dish: item.special_dish || 0,
+        isPosVariant: Boolean(item.is_pos_variant),
+        hasVariants: Boolean(item.has_variants),
         tax_rate: 0,
       }));
 

@@ -5,7 +5,7 @@ import { usePOSStore } from '../store/pos-store';
 import { cn } from '../lib/utils';
 import { CurrencyAmount } from './CurrencyAmount';
 import { Button, Input } from './ui';
-import { Dialog, DialogContent } from './ui/dialog';
+import { isDisplayMenuItem } from '../lib/menu-display';
 
 const Spotlight = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,8 +15,10 @@ const Spotlight = () => {
   const { menuItems, addToOrder, setSelectedItem } = usePOSStore();
 
   const filteredItems = menuItems.filter(item =>
-    item.name.toLowerCase().includes(query.toLowerCase()) ||
-    item.category.toLowerCase().includes(query.toLowerCase())
+    isDisplayMenuItem(item) && (
+      item.name.toLowerCase().includes(query.toLowerCase()) ||
+      item.category.toLowerCase().includes(query.toLowerCase())
+    )
   ).slice(0, 10);
 
   useEffect(() => {

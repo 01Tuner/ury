@@ -3,6 +3,7 @@ import { usePOSStore } from '../store/pos-store';
 import MenuCard from './MenuCard';
 import { Spinner } from './ui/spinner';
 import { cn } from '../lib/utils';
+import { isDisplayMenuItem } from '../lib/menu-display';
 import { t } from '../i18n';
 
 interface MenuListProps {
@@ -28,6 +29,7 @@ const MenuList: React.FC<MenuListProps> = ({ onItemClick }) => {
 
   const filteredItems = useMemo(() => {
     return menuItems.filter(item => {
+      if (!isDisplayMenuItem(item)) return false;
       const searchTerm = searchQuery.toLowerCase();
       const matchesCategory = !selectedCategory || item.course === selectedCategory;
       const matchesSearch = !searchQuery || 
@@ -74,6 +76,7 @@ const MenuList: React.FC<MenuListProps> = ({ onItemClick }) => {
                 id={item.id}
                 name={item.name}
                 price={item.price}
+                hasVariants={item.hasVariants}
                 item_image={item.image}
                 course={item.course_label || item.course}
                 item={item.item}

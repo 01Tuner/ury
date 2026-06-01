@@ -7,6 +7,7 @@ import { cn } from '../lib/utils';
 import { Button, Badge } from './ui';
 import CommentDialog from './CommentDialog';
 import { useState } from 'react';
+import { isDisplayMenuItem } from '../lib/menu-display';
 import { t } from '../i18n';
 
 interface SidebarProps {
@@ -17,15 +18,15 @@ const Sidebar = ({ disabled }: SidebarProps) => {
   const { selectedCategory, setSelectedCategory, menuItems, categories, orderComment, setOrderComment } = usePOSStore();
   const [showCommentDialog, setShowCommentDialog] = useState(false);
 
-  // Count items per category
+  const displayMenuItems = menuItems.filter(isDisplayMenuItem);
+
   const getCategoryCount = (category: string) => {
-    const count = menuItems.filter(item => item.course === category).length;
+    const count = displayMenuItems.filter(item => item.course === category).length;
     return count;
   };
 
   const getAllItemsCount = () => {
-    const count = menuItems.length;
-    return count;
+    return displayMenuItems.length;
   };
 
   const handleCommentSave = (comment: string) => {

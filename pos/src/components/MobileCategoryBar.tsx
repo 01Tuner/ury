@@ -2,6 +2,7 @@ import { Grid3X3, UtensilsCrossed } from 'lucide-react';
 import { usePOSStore } from '../store/pos-store';
 import { cn } from '../lib/utils';
 import { Badge } from './ui';
+import { isDisplayMenuItem } from '../lib/menu-display';
 import { t } from '../i18n';
 
 interface MobileCategoryBarProps {
@@ -11,8 +12,10 @@ interface MobileCategoryBarProps {
 const MobileCategoryBar = ({ disabled }: MobileCategoryBarProps) => {
   const { selectedCategory, setSelectedCategory, menuItems, categories } = usePOSStore();
 
+  const displayMenuItems = menuItems.filter(isDisplayMenuItem);
+
   const getCategoryCount = (category: string) =>
-    menuItems.filter((item) => item.course === category).length;
+    displayMenuItems.filter((item) => item.course === category).length;
 
   return (
     <div
@@ -38,7 +41,7 @@ const MobileCategoryBar = ({ disabled }: MobileCategoryBarProps) => {
           <Grid3X3 className="w-3.5 h-3.5" />
           {t('pos_sidebar.all_items')}
           <Badge variant="secondary" size="sm" className="min-w-[20px] text-center text-xs">
-            {menuItems.length}
+            {displayMenuItems.length}
           </Badge>
         </button>
         {categories.map((category) => (

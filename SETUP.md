@@ -113,7 +113,6 @@ This guide takes you step-by-step through setting up URY on top of ERPNext
 - Create [Item](https://docs.erpnext.com/docs/user/manual/en/item) to be included in the URY Menu.
 - If an item is sold in a bundle, consider using the [Product Bundle](https://docs.erpnext.com/docs/user/manual/en/product-bundle) feature.
 
-
 ### Step 7 : URY Menu
 
 - Create Restaurant Menu From "URY Menu List" with the following details:

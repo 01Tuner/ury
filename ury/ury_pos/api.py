@@ -112,7 +112,37 @@ def getRestaurantMenu(pos_profile, room=None, order_type=None):
         fields=["item", "item_name", "rate", "special_dish", "disabled", "course"],
         order_by="item_name asc"
     )
-    
+
+    menu_item_codes = [item.item for item in menu_items]
+    pos_variant_codes = set()
+    parent_has_variants = set()
+
+    if menu_item_codes:
+        pos_variant_codes = set(
+            frappe.db.sql(
+                """
+                SELECT DISTINCT item
+                FROM `tabPOS Item Variants`
+                WHERE item IN %(codes)s
+                """,
+                {"codes": menu_item_codes},
+                pluck=True,
+            )
+            or []
+        )
+        parent_has_variants = set(
+            frappe.db.sql(
+                """
+                SELECT DISTINCT parent
+                FROM `tabPOS Item Variants`
+                WHERE parent IN %(codes)s
+                """,
+                {"codes": menu_item_codes},
+                pluck=True,
+            )
+            or []
+        )
+
     menu_items_with_image = [
         {
             "item": item.item,
@@ -123,6 +153,8 @@ def getRestaurantMenu(pos_profile, room=None, order_type=None):
             "item_image": frappe.db.get_value("Item", item.item, "image"),
             "course": item.course,
             "course_label": _(item.course) if item.course else item.course,
+            "is_pos_variant": 1 if item.item in pos_variant_codes else 0,
+            "has_variants": 1 if item.item in parent_has_variants else 0,
         }
         for item in menu_items
     ]

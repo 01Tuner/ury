@@ -153,7 +153,7 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
           setAddonItemCodes([]);
         }
       })
-      .catch((err: any) => {
+      .catch(() => {
         setAddonError('Failed to fetch add-ons');
         setAddonItemCodes([]);
       })
@@ -253,8 +253,7 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
     const orderItem: OrderItem = {
       ...selectedItem,
       quantity: numericQuantity,
-      price: basePrice,
-      comment: comments,
+      price: basePrice
     };
     addToOrder(orderItem);
 
@@ -495,4 +494,4 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
   );
 };
 
-export default ProductDialog; 
+export default ProductDialog;

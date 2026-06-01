@@ -6,6 +6,7 @@ interface MenuCardProps {
   id: string;
   name: string;
   price: number;
+  hasVariants?: boolean;
   item_image: string | null;
   course?: string;
   item: string;
@@ -16,13 +17,16 @@ interface MenuCardProps {
 const MenuCard: FC<MenuCardProps> = ({ 
   id, 
   name, 
-  price, 
+  price,
+  hasVariants = false,
   item_image, 
   course, 
   item, 
   onClick,
   disabled 
 }) => {
+  const showPrice = !(hasVariants && price === 0);
+
   return (
     <div
       className={cn(
@@ -76,7 +80,9 @@ const MenuCard: FC<MenuCardProps> = ({
 
         {/* Price section - pushed to bottom */}
         <div className="mt-auto pt-2">
-          <CurrencyAmount amount={price} className="text-sm font-semibold text-foreground" />
+          {showPrice && (
+            <CurrencyAmount amount={price} className="text-sm font-semibold text-foreground" />
+          )}
         </div>
       </div>
     </div>

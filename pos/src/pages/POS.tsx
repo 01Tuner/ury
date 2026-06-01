@@ -49,15 +49,18 @@ export default function POS() {
 
     clickTimerRef.current = setTimeout(() => {
       if (clickCountRef.current === 1) {
-        // Single click - add to cart
-        addToOrder({ ...item, quantity: 1 });
+        if (item.hasVariants) {
+          setSelectedItem(item);
+          setIsDialogOpen(true);
+        } else {
+          addToOrder({ ...item, quantity: 1 });
+        }
       } else if (clickCountRef.current === 2) {
-        // Double click - open dialog
         setSelectedItem(item);
         setIsDialogOpen(true);
       }
       clickCountRef.current = 0;
-    }, 250); // 250ms threshold for double click
+    }, 250);
   };
 
   const QuickFilterButton = ({ filter, icon: Icon, label }: { 
